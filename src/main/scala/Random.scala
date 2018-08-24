@@ -7,6 +7,14 @@ package distributions
  * then you can sample several other distributions.
  * The other critical distribution is the gamma, which from there, you can easily
  * sample some distributions.
+ * For discrete distributions, Poisson presents most challenges. From Poisson
+ * (and gamma), though, you can get negative binomial (and geometric).
+ *
+ * In conclusion, given that you have a random unit uniform sampler, implement these first:
+ * - normal
+ * - gamma
+ * - poisson
+ * The other distributions will transformations of (an assortment of) these and the uniform.
  */
 
 trait RandomGeneric {
@@ -129,12 +137,23 @@ trait RandomGeneric {
 
 
   // Discrete univariate
-  def rgeom = ???
-  def rnegbinom = ???
-  def rpois = {
+  def rpois(lam:Double):Int = {
     //https://www.johndcook.com/blog/2010/06/14/generating-poisson-random-values/???
     ???
   }
+
+  def rnegbinom(numSuccess:Double, probSuccess:Double):Int = {
+    // numSuccess: target for number of successful trials (>0)
+    // mean: numSuccess * (1.probSuccess) / probSuccess
+    // samples: number of failures that occur before `r` successes are reached
+    // TODO: Test using bernoulli trials!
+    rpois(rgamma(shape=numSuccess, rate=probSuccess/(1-probSuccess)))
+  }
+
+  def rgeom(r:Int, p:Double):Int = {
+    rnegbinom(1, p)
+  }
+
   def wsampleIndex(prob:IndexedSeq[Double]): Int = ???
   def wsampleIndexByLogProb(logProb:IndexedSeq[Double]): Int = ???
 
