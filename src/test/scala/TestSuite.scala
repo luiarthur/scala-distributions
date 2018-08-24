@@ -14,12 +14,16 @@ class MyFunSuite extends FunSuite {
 }
 
 class TestSuite extends MyFunSuite {
-  import distributions._RandomTest._
+  // Don't use ThreadLocalRandom for testing (for reproducibility)
   //import distributions.Random._
 
-  import org.apache.commons.math3.special.Gamma.{gamma => gammaFunction}
+  // Use scala.util.Rnadom instead
+  import distributions._RandomTest._
+  R.setSeed(11)
 
-  val commonsMathR = new RandomDataGenerator()
+
+  import org.apache.commons.math3.special.Gamma.{gamma => gammaFunction}
+  //val commonsMathR = new RandomDataGenerator()
 
   def mean(x:Vector[Double]) = x.sum / x.size
   def sd(x: Vector[Double]) = {
@@ -44,24 +48,37 @@ class TestSuite extends MyFunSuite {
   println
 
   testWithMsg("Random Uniform") {
-    import scala.collection.parallel.immutable.ParVector
+    //import scala.collection.parallel.immutable.ParVector
     val (xmin, xmax) = (2,20)
     val x = List.fill(n)(runif(2,20))
     assert( x.max < xmax && x.min > xmin)
   }
 
   testWithMsg("Random Normal") {
-    val x = List.fill(n)(rnorm(5,2))
+    val (m,s) = (5,2)
+    val x = Vector.fill(1E6.toInt)(rnorm(m,s))
+    val xMean = mean(x)
+    val xSd = sd(x)
+    assertApprox(xMean, m, m * .01)
+    assertApprox(xSd, s, s * .1)
   }
 
   testWithMsg("Random Exponential") {
-    val x = List.fill(n)(rexp(3))
+    val lam = 3.0
+    val x = Vector.fill(1E6.toInt)(rexp(lam))
+    val xMean = mean(x)
+    val xVar = variance(x)
+    val trueMean = 1 / lam
+    val trueVar = 1 / (lam*lam)
+    assertApprox(xMean, trueMean, trueMean * .01)
+    assertApprox(xVar, trueVar, trueVar * .1)
   }
 
   testWithMsg("Random Gamma") {
-    val testShape = (0.1 to 2.0 by 0.1).toList.map(round(_, 1))
-    val testRate = (0.1 to 2.0 by 0.1).toList.map(round(_, 1))
-    val niter = 1E4.toInt
+    //val testShape = (0.1 to 2.0 by 0.1).toList.map(round(_, 1))
+    val testShape = List(0.1, 1.0, 2.0)
+    val testRate = List(0.1, 1.0, 2.0)
+    val niter = 1E6.toInt
 
     for (shape <- testShape; rate <- testRate) {
       val x = Vector.fill(niter){ rgamma(shape, rate) }
@@ -69,9 +86,8 @@ class TestSuite extends MyFunSuite {
       val xVar = variance(x)
       val trueMean = shape / rate
       val trueVar = shape / math.pow(rate,2)
-      //println(s"shape: $shape, rate: $rate")
-      assertApprox(xMean, trueMean, trueMean/10.0, debug=false)
-      assertApprox(xVar, trueVar, trueVar/5.0, debug=false)
+      assertApprox(xMean, trueMean, trueMean * .01, debug=false)
+      assertApprox(xVar, trueVar, trueVar*.1, debug=false)
     }
   }
 
@@ -146,8 +162,8 @@ class TestSuite extends MyFunSuite {
       val trueMean = d2 / (d2-2) 
       val xVar = variance(x)
       val trueVar = 2 * d2*d2 * (d1+d2-2) / (d1 * math.pow(d2-2, 2) * (d2-4))
-      assertApprox(xMean, trueMean, trueMean * .1, debug=true)
-      assertApprox(xVar, trueVar, trueVar * .2, debug=true)
+      assertApprox(xMean, trueMean, trueMean * .1)
+      assertApprox(xVar, trueVar, trueVar * .2)
     }
   }
 
@@ -160,9 +176,9 @@ class TestSuite extends MyFunSuite {
     val xMean = mean(x)
     val trueMean = scale * gammaFunction(1 + 1/shape)
     val xVar = variance(x)
-    assertApprox(xMean, trueMean, trueMean * .1, debug=true)
+    assertApprox(xMean, trueMean, trueMean * .1)
     val trueVar = pow(scale,2) * (gammaFunction(1+2/shape) - pow(gammaFunction(1+1/shape),2))
-    assertApprox(xVar, trueVar, trueVar * .2, debug=true)
+    assertApprox(xVar, trueVar, trueVar * .2)
   }
 
   println 

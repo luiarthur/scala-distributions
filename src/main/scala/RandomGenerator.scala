@@ -12,15 +12,15 @@ trait RandomGenerator {
 class _ScalaUtilRandom extends RandomGenerator {
   val R = scala.util.Random
   //override def nextGaussian = R.nextGaussian
-  override def nextDouble = R.nextDouble
-  override def setSeed(x:Long) = R.setSeed(x)
+  def nextDouble = R.nextDouble
+  def setSeed(x:Long) = R.setSeed(x)
 }
 
 class _ThreadLocalRandom extends RandomGenerator {
   import java.util.concurrent.{ ThreadLocalRandom => R }
   //override def nextGaussian = R.current().nextGaussian
-  override def nextDouble = R.current.nextDouble
-  override def setSeed(x:Long) = R.current.setSeed(x)
+  def nextDouble = R.current.nextDouble
+  def setSeed(x:Long) = R.current.setSeed(x)
 }
 
 
