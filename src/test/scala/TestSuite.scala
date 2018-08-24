@@ -14,7 +14,9 @@ class MyFunSuite extends FunSuite {
 }
 
 class TestSuite extends MyFunSuite {
-  import distributions.Random._
+  import distributions._RandomTest._
+  //import distributions.Random._
+
   val commonsMathR = new RandomDataGenerator()
 
   def mean(x:Vector[Double]) = x.sum / x.size
@@ -94,7 +96,8 @@ class TestSuite extends MyFunSuite {
     val testB = (1.1 to 3.0 by 0.1).toList.map(round(_,1))
     val niter = 1E4.toInt
 
-    for (a <- testA; b <- testB) {
+    lazy val ab = {for (a <- testA; b <- testB) yield (a,b)}.toList
+    ab.foreach { case (a,b) => 
       val x = Vector.fill(niter){ rbeta(a, b) }
       val xMean = mean(x)
       val trueMean = a / (a + b)

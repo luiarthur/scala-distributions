@@ -1,16 +1,10 @@
 package distributions
 
-object Random {
+trait RandomGeneric {
   // See common distributions to implement
   //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/random/RandomDataGenerator.html
 
-
-  // For Production
-  //val R = java.util.concurrent.ThreadLocalRandom.current()
-
-  // For Testing...
-  val R = scala.util.Random
-  R.setSeed(10)
+  val R: RandomGenerator
 
   def round(x:Double, d:Int) = {
     require(d >= 0)
@@ -116,6 +110,14 @@ object Random {
     require(n >= 0 && p >= 0 && p <= 1)
     List.fill(n)(rbern(p)).sum
   }
+}
 
+object Random extends RandomGeneric {
+  val R = new _ThreadLocalRandom()
+}
 
+object _RandomTest extends RandomGeneric {
+  val R = new _ScalaUtilRandom()
+  //R.setSeed(1) // should fail
+  R.setSeed(10) // should pass
 }
