@@ -117,17 +117,6 @@ trait RandomGeneric {
     scale * math.pow(-math.log(rU), 1 / shape)
   }
 
-
-  // Discrete univariate
-  def rgeom = ???
-
-  def rnegbinom = ???
-
-  def rpois = {
-    //https://www.johndcook.com/blog/2010/06/14/generating-poisson-random-values/???
-    ???
-  }
-
   def rbern(p:Double):Int = {
     require(p >= 0 && p <= 1)
     if (p > R.nextDouble) 1 else 0
@@ -137,6 +126,21 @@ trait RandomGeneric {
     require(n >= 0 && p >= 0 && p <= 1)
     List.fill(n)(rbern(p)).sum
   }
+
+
+  // Discrete univariate
+  def rgeom = ???
+  def rnegbinom = ???
+  def rpois = {
+    //https://www.johndcook.com/blog/2010/06/14/generating-poisson-random-values/???
+    ???
+  }
+  def wsampleIndex(prob:IndexedSeq[Double]): Int = ???
+  def wsampleIndexByLogProb(logProb:IndexedSeq[Double]): Int = ???
+
+  // multivariate
+  def rdir(x:IndexedSeq[Double]): IndexedSeq[Double] = ???
+  def rmvnorm(m:IndexedSeq[Double], cov:IndexedSeq[IndexedSeq[Double]]): IndexedSeq[Double] = ???
 }
 
 object Random extends RandomGeneric {
@@ -145,6 +149,4 @@ object Random extends RandomGeneric {
 
 object _RandomTest extends RandomGeneric {
   val R = new _ScalaUtilRandom()
-  //R.setSeed(1) // should fail
-  R.setSeed(11) // should pass
 }
