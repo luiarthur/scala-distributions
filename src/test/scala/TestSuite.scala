@@ -19,10 +19,8 @@ class TestSuite extends MyFunSuite {
 
   // Use scala.util.Rnadom instead
   import distributions._RandomTest._
-  R.setSeed(11)
+  Rand.setSeed(11)
 
-
-  import org.apache.commons.math3.special.Gamma.{gamma => gammaFunction}
   //val commonsMathR = new RandomDataGenerator()
 
   def mean(x:Vector[Double]) = x.sum / x.size
@@ -43,9 +41,72 @@ class TestSuite extends MyFunSuite {
     assert(valid)
   }
 
+  def assertApproxMat(a:Array[Array[Double]], b:Array[Array[Double]], eps:Double=1E-3, debug:Boolean=false): Unit = {
+    import distributions.SpecialFunctions.printMat
+
+    val matA = a.flatten
+    val matB = b.flatten
+    matA.zip(matB).foreach{ case (ma,mb) => 
+      assertApprox(ma, mb, eps)
+    }
+  }
   
   val n = 1E5.toInt
   println
+
+  testWithMsg("choleskyL") {
+    import distributions.SpecialFunctions._
+    val mat = Array(Array(25.0, 15.0, -5.0), 
+                    Array(15.0, 18.0,  0.0),
+                    Array(-5.0,  0.0, 11.0))
+    val trueChoL = Array(Array( 5.0, 0.0, 0.0), 
+                         Array( 3.0, 3.0, 0.0),
+                         Array(-1.0, 1.0, 3.0))
+    val cholMat = choleskyL(mat)
+    printMat(cholMat)
+    assertApproxMat(cholMat, trueChoL)
+
+    val case2 = Map("x" ->
+      Array(Array(18.0,  22.0,   54.0,   42.0), 
+            Array(22.0,  70.0,   86.0,   62.0), 
+            Array(54.0,  86.0,  174.0,  134.0), 
+            Array(42.0,  62.0,  134.0,  106.0)),
+      "truth" -> 
+      Array(Array( 4.24264, 0.00000, 0.00000, 0.00000),
+            Array( 5.18545, 6.56591, 0.00000, 0.00000),
+            Array(12.72792, 3.04604, 1.64974, 0.00000),
+            Array( 9.89949, 1.62455, 1.84971, 1.39262))
+    )
+    val chol2 = choleskyL(case2("x"))
+    printMat(chol2)
+    assertApproxMat(chol2, case2("truth"))
+
+    val dim = 300
+    val eyeMat = eye(dim)
+    print(s"Time taken to compute cholesky of ${dim}x${dim}: ")
+    timer {
+      choleskyL(eyeMat)
+    }
+  }
+
+  testWithMsg("vvMult") {
+    import distributions.SpecialFunctions._
+    val a = Array(1.0, 2.0 ,3.0)
+    val b = Array(2.0, 3.0 ,4.0)
+    val c = vvMult(a, b)
+    assert( c == 20.0 )
+  }
+
+  testWithMsg("isSquare") {
+    import distributions.SpecialFunctions._
+    val squareMat = Array.ofDim[Double](5,5)
+    assert( isSquare(squareMat) )
+
+    val nonsquareMat = Array.ofDim[Double](5,3)
+    assert( !isSquare(nonsquareMat) )
+  }
+
+
 
   testWithMsg("Random Uniform") {
     //import scala.collection.parallel.immutable.ParVector
@@ -169,6 +230,7 @@ class TestSuite extends MyFunSuite {
 
 
   testWithMsg("Random Weibull") {
+    import org.apache.commons.math3.special.Gamma.{gamma => gammaFunction}
     import math.pow
     val niter = 1E6.toInt
     val (shape, scale) = (3.0, 5.0)
@@ -238,11 +300,19 @@ class TestSuite extends MyFunSuite {
   }
 
   testWithMsg("nextInt") {
-    val x = R.nextInt(10)
+    val x = Rand.nextInt(10)
   }
 
   testWithMsg("Random MVNormal") {
-    // TODO
+    import distributions.SpecialFunctions._
+    val m = Array(1.0, 2.0, 3.0)
+    val covMat = eye(3); covMat(1)(1) = 0.5
+    val n = 1E5.toInt
+    val xs = Array.fill(n)(rmvnorm(m, covMat))
+    val xsMean = xs.transpose.map{ x => mean(x.toVector) }
+    val xsVar = xs.transpose.map{ x => variance(x.toVector) }
+    xsMean.zip(m.toVector).foreach{ case (a,b) => assertApprox(a,b,1E-2) }
+    xsVar.zip(Vector(1.0, 0.5, 1.0)).foreach{ case (a,b) => assertApprox(a,b,1E-2) }
   }
 
   println 

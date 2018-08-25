@@ -11,19 +11,19 @@ trait RandomGenerator {
 }
 
 class _ScalaUtilRandom extends RandomGenerator {
-  val R = scala.util.Random
-  //override def nextGaussian = R.nextGaussian
-  def nextDouble = R.nextDouble
-  def setSeed(seed:Long) = R.setSeed(seed)
-  def nextInt(numDistinct:Int) = R.nextInt(numDistinct)
+  val Rand = scala.util.Random
+  //override def nextGaussian = Rand.nextGaussian
+  def nextDouble = Rand.nextDouble
+  def setSeed(seed:Long) = Rand.setSeed(seed)
+  def nextInt(numDistinct:Int) = Rand.nextInt(numDistinct)
 }
 
 class _ThreadLocalRandom extends RandomGenerator {
-  import java.util.concurrent.{ ThreadLocalRandom => R }
-  //override def nextGaussian = R.current().nextGaussian
-  def nextDouble = R.current.nextDouble
-  def nextInt(numDistinct:Int) = R.current.nextInt(numDistinct)
-  def setSeed(seed:Long) = R.current.setSeed(seed)
+  import java.util.concurrent.{ ThreadLocalRandom => Rand }
+  //override def nextGaussian = Rand.current().nextGaussian
+  def nextDouble = Rand.current.nextDouble
+  def nextInt(numDistinct:Int) = Rand.current.nextInt(numDistinct)
+  def setSeed(seed:Long) = Rand.current.setSeed(seed)
 }
 
 

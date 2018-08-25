@@ -21,17 +21,16 @@ package distributions
  *   - Dirichlet
  *
  * For discrete, you also need a (weighted) categorical sampler.
+ *
+ * See common distributions to implement here:
+ * http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/random/RandomDataGenerator.html
  */
 
 trait RandomGeneric {
-  // See common distributions to implement
-  //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/random/RandomDataGenerator.html
-  import org.apache.commons.math3.special.Gamma.{logGamma => lgamma}
-  import org.apache.commons.math3.linear.{
-    Array2DRowRealMatrix, ArrayRealVector, CholeskyDecomposition
-  }
-
-  val R: RandomGenerator
+  import SpecialFunctions.logFactorial // for rpois
+  import SpecialFunctions.{vvAdd, mvMult, choleskyL} // for rmvnorm
+ 
+  val Rand: RandomGenerator
 
   def round(x:Double, d:Int) = {
     require(d >= 0)
@@ -40,7 +39,7 @@ trait RandomGeneric {
     (x * factor).toInt / factor
   }
 
-  private def rU() = R.nextDouble
+  private def rU() = Rand.nextDouble
 
   // univairate continuous
   def runif(a: Double=0, b: Double=1) = {
@@ -52,15 +51,15 @@ trait RandomGeneric {
   def rnorm(mean: Double=0, sd: Double=1, variance: Option[Double]=None) = {
     require(sd > 0)
     variance match {
-      case Some(v) => R.nextGaussian * math.sqrt(v) + mean
-      case _ => R.nextGaussian * sd + mean
+      case Some(v) => Rand.nextGaussian * math.sqrt(v) + mean
+      case _ => Rand.nextGaussian * sd + mean
     }
   }
   */
 
   def rnorm(mean: Double=0, sd: Double=1) = {
     require(sd > 0)
-    R.nextGaussian * sd + mean
+    Rand.nextGaussian * sd + mean
   }
 
 
@@ -74,7 +73,7 @@ trait RandomGeneric {
     val c = 1.0 / math.sqrt(9*d)
 
     def engine(): Double = {
-      val z = R.nextGaussian
+      val z = Rand.nextGaussian
       lazy val u = rU()
       lazy val v = math.pow(1 + c*z, 3)
       if (z > -1.0/c && math.log(u) < z*z/2.0 + d*(1-v+math.log(v))) {
@@ -120,7 +119,7 @@ trait RandomGeneric {
   }
 
   def rtdist(df:Double):Double = {
-    lazy val z = R.nextGaussian
+    lazy val z = Rand.nextGaussian
     lazy val v = rchisq(df)
     z * math.sqrt(df / v)
   }
@@ -137,7 +136,7 @@ trait RandomGeneric {
 
   def rbern(p:Double):Int = {
     require(p >= 0 && p <= 1)
-    if (p > R.nextDouble) 1 else 0
+    if (p > Rand.nextDouble) 1 else 0
   }
 
   def rbinom(n:Int, p:Double):Int = {
@@ -167,12 +166,12 @@ trait RandomGeneric {
     def engine(): Int = {
       val u = rU()
       val x = (alpha - math.log(1/u - 1)) / beta
-      val n = math.floor(x)
+      val n = math.floor(x).toInt
       if (n < 0) engine() else {
         val v = rU()
         val y = alpha - beta * x
         val lhs = y + math.log(v) - 2 * math.log(1 + math.exp(y))
-        val rhs = k + n * math.log(lam) - lgamma(n + 1)
+        val rhs = k + n * math.log(lam) - logFactorial(n)
         if (lhs <= rhs) n.toInt else engine()
       }
     }
@@ -223,19 +222,37 @@ trait RandomGeneric {
     x.map{_ / xSum}
   }
 
-  def rmvnorm(m:ArrayRealVector, cov:Array2DRowRealMatrix): ArrayRealVector = {
-    val n = m.getDimension
-    val z = new ArrayRealVector(Array.fill(n){ R.nextGaussian })
-    val A = (new CholeskyDecomposition(cov)).getL
-    //(A multiply z).add(m)
-    ???
+  /* Commons Math version
+  */
+  import org.apache.commons.math3.linear.{
+    Array2DRowRealMatrix, ArrayRealVector, CholeskyDecomposition
   }
+  def rmvnorm(m:Array[Double], cov:Array[Array[Double]]): Array[Double] = {
+    val n = m.size
+    val mVec = new Array2DRowRealMatrix(m)
+    val z = new Array2DRowRealMatrix(Array.fill(n){ Rand.nextGaussian })
+    val covMat = new Array2DRowRealMatrix(cov)
+    val A = (new CholeskyDecomposition(covMat)).getL
+    A.multiply(z).add(mVec).getData.flatten
+  }
+  
+  /* Personal Version 
+  def rmvnorm(m:Array[Double], cov:Array[Array[Double]]): Array[Double] = {
+    // LL' = covMat
+    // z ~ N(0, I)
+    // x = m + L*z
+    lazy val n = m.size
+    lazy val z = Array.fill(n){Rand.nextGaussian}
+    lazy val L = choleskyL(cov)
+    vvAdd(m, mvMult(L, z))
+  }
+  */
 }
 
 object Random extends RandomGeneric {
-  val R = new _ThreadLocalRandom()
+  val Rand = new _ThreadLocalRandom()
 }
 
 object _RandomTest extends RandomGeneric {
-  val R = new _ScalaUtilRandom()
+  val Rand = new _ScalaUtilRandom()
 }
