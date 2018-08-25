@@ -223,7 +223,6 @@ trait RandomGeneric {
   }
 
   /* Commons Math version
-  */
   import org.apache.commons.math3.linear.{
     Array2DRowRealMatrix, ArrayRealVector, CholeskyDecomposition
   }
@@ -235,8 +234,10 @@ trait RandomGeneric {
     val A = (new CholeskyDecomposition(covMat)).getL
     A.multiply(z).add(mVec).getData.flatten
   }
+  */
   
   /* Personal Version 
+  */
   def rmvnorm(m:Array[Double], cov:Array[Array[Double]]): Array[Double] = {
     // LL' = covMat
     // z ~ N(0, I)
@@ -246,7 +247,6 @@ trait RandomGeneric {
     lazy val L = choleskyL(cov)
     vvAdd(m, mvMult(L, z))
   }
-  */
 }
 
 object Random extends RandomGeneric {

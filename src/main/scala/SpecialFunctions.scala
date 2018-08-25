@@ -48,32 +48,35 @@ object SpecialFunctions {
 
   /* @return L, where LL' = A
    * @todo: Need to make this more efficient.
-   */
-  def choleskyL(A: Array[Array[Double]], checkDim:Boolean=false): Array[Array[Double]] = {
-    val n = A.size
-    if (checkDim) {
-      require(isSquare(A)) 
-    }
+   * @see: https://rosettacode.org/wiki/Cholesky_decomposition   */
+  def choleskyL(A: Array[Array[Double]],
+                checkDim:Boolean=false,
+                useJava:Boolean=true): Array[Array[Double]] = {
 
-    val L = Array.ofDim[Double](n,n)
-    
-    for (i <- 0 until n; j <- 0 to i) {
-      (i,j) match {
-        case (a,b) if a==b => {
-          val x = L(i).take(i).map(lij => lij*lij).sum
-          L(i)(i) = math.sqrt(A(i)(i) - x)
-        }
-        case _ => {
-          var x = 0.0
-          for (k <- 0 until j) {
-            x += L(i)(k) * L(j)(k)
+    if (checkDim) { require(isSquare(A)) }
+
+    if (useJava) Cholesky.getL(A) else {
+      val n = A.size
+      val L = Array.ofDim[Double](n,n)
+      
+      for (i <- 0 until n; j <- 0 to i) {
+        (i,j) match {
+          case (a,b) if a==b => {
+            val x = L(i).take(i).map(lij => lij*lij).sum
+            L(i)(i) = math.sqrt(A(i)(i) - x)
           }
-          L(i)(j) =  (A(i)(j) - x) / L(j)(j)
+          case _ => {
+            var x = 0.0
+            for (k <- 0 until j) {
+              x += L(i)(k) * L(j)(k)
+            }
+            L(i)(j) =  (A(i)(j) - x) / L(j)(j)
+          }
         }
       }
-    }
 
-    return(L)
+      return(L)
+    }
   }
 
   def printMat(x:Array[Array[Double]]): Unit = {
