@@ -15,12 +15,21 @@ package distributions
  * - gamma
  * - poisson
  * The other distributions will transformations of (an assortment of) these and the uniform.
+ *
+ * Then, the two most important multivariate distributions are 
+ *   - multivariate Normal
+ *   - Dirichlet
+ *
+ * For discrete, you also need a (weighted) categorical sampler.
  */
 
 trait RandomGeneric {
   // See common distributions to implement
   //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/random/RandomDataGenerator.html
   import org.apache.commons.math3.special.Gamma.{logGamma => lgamma}
+  import org.apache.commons.math3.linear.{
+    Array2DRowRealMatrix, ArrayRealVector, CholeskyDecomposition
+  }
 
   val R: RandomGenerator
 
@@ -192,7 +201,7 @@ trait RandomGeneric {
     val pSum = prob.sum
     val u = rU() * pSum
 
-    def engine(cumsum:Double=0, p:IndexedSeq[Double]=prob, i:Int=0):Int = {
+    def engine(cumsum:Double=prob.head, p:IndexedSeq[Double]=prob.tail, i:Int = 0):Int = {
       if (cumsum < u) {
         engine(cumsum + p.head, p.tail, i+1)
       } else i
@@ -200,6 +209,7 @@ trait RandomGeneric {
 
     engine()
   }
+
   def wsampleIndexByLogProb(logProb:IndexedSeq[Double]): Int = {
     val logProbMax = logProb.max
     val prob = logProb.map(_ - logProbMax)
@@ -213,7 +223,13 @@ trait RandomGeneric {
     x.map{_ / xSum}
   }
 
-  def rmvnorm(m:IndexedSeq[Double], cov:IndexedSeq[IndexedSeq[Double]]): IndexedSeq[Double] = ???
+  def rmvnorm(m:ArrayRealVector, cov:Array2DRowRealMatrix): ArrayRealVector = {
+    val n = m.getDimension
+    val z = new ArrayRealVector(Array.fill(n){ R.nextGaussian })
+    val A = (new CholeskyDecomposition(cov)).getL
+    //(A multiply z).add(m)
+    ???
+  }
 }
 
 object Random extends RandomGeneric {

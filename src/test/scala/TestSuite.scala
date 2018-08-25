@@ -211,18 +211,39 @@ class TestSuite extends MyFunSuite {
     val simMean = mean(y)
     val simVar = variance(y)
     val trueMean = testN * (1-testP) / testP
-    assertApprox(xMean, simMean, simMean * .1, debug=true)
-    assertApprox(xVar, simVar, simVar * .1, debug=true)
-    assertApprox(xMean, trueMean, trueMean * .1, debug=true)
+    assertApprox(xMean, simMean, simMean * .1, debug=false)
+    assertApprox(xVar, simVar, simVar * .1, debug=false)
+    assertApprox(xMean, trueMean, trueMean * .1, debug=false)
   }
 
-  testWithMsg("Random wsampleIndex") {/*TODO*/}
+  testWithMsg("Random wsampleIndex") {
+    val niter=1E6.toInt
+    val probs = Vector(.2, .3, .5)
+    //val x = Vector.fill(niter){ wsampleIndex(probs).toDouble }
+    val x = Vector.fill(niter){ wsampleIndex(probs.map(_ *100)).toDouble }
+    val trueMean = probs.zipWithIndex.map{ case (i, p) => i * p }.sum
+    val trueVar = probs.zipWithIndex.map{ case (i, p) => i * i * p }.sum
+    assertApprox(mean(x), trueMean, trueMean * .01, debug=true)
+    assertApprox(variance(x), trueVar, trueVar * .05, debug=true)
+  }
+
   testWithMsg("Random Dirichlet") {
     // TODO: Other tests
-    val x = rdir(Vector(2000,1000,1000))
+    val a = Vector(2000.0, 1000.0, 1000.0)
+    val x = rdir(a)
     assertApprox(x.sum, 1, 1E-6)
+    a.indices.foreach{ i =>
+      assertApprox(x(i), a(i)/a.sum, .01, debug=true)
+    }
   }
-  testWithMsg("Random MVNormal") {}
+
+  testWithMsg("nextInt") {
+    val x = R.nextInt(10)
+  }
+
+  testWithMsg("Random MVNormal") {
+    // TODO
+  }
 
   println 
 }
