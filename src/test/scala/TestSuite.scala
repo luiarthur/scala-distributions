@@ -38,7 +38,7 @@ class TestSuite extends MyFunSuite {
     if (debug) {
       if (!valid) {
         println(s"invalid -- x: $x; y:$y")
-      } else println("valid")
+      } else println(s"valid -- x: $x; y:$y")
     }
     assert(valid)
   }
@@ -180,6 +180,49 @@ class TestSuite extends MyFunSuite {
     val trueVar = pow(scale,2) * (gammaFunction(1+2/shape) - pow(gammaFunction(1+1/shape),2))
     assertApprox(xVar, trueVar, trueVar * .2)
   }
+
+  testWithMsg("Random Poisson") {
+    val niter = 1E6.toInt
+    val testLam = List(3,40)
+    testLam.foreach{lam => 
+      val x = Vector.fill(niter)(rpois(lam).toDouble)
+      val xMean = mean(x)
+      val xVar = variance(x)
+      val trueMean, trueVar = lam
+      assertApprox(xMean, trueMean, trueMean * .1)
+      assertApprox(xVar, trueVar, trueVar * .1)
+    }
+  }
+
+  testWithMsg("Random Negative Binomial") {
+    def numFailuresTillSuccesses(n:Int, p:Double, numSuccesses:Int=0, numFailures:Int=0): Int = {
+      if (numSuccesses == n) numFailures else {
+        val success = rbern(p)
+        numFailuresTillSuccesses(n, p, numSuccesses+success, numFailures+(1-success))
+      }
+    }
+    val testN = 5
+    val testP = .3
+    val niter = 1E6.toInt
+    val x = Vector.fill(niter)(rnegbinom(testN, testP).toDouble)
+    val xMean = mean(x)
+    val xVar = variance(x)
+    val y = Vector.fill(niter)(numFailuresTillSuccesses(testN, testP).toDouble)
+    val simMean = mean(y)
+    val simVar = variance(y)
+    val trueMean = testN * (1-testP) / testP
+    assertApprox(xMean, simMean, simMean * .1, debug=true)
+    assertApprox(xVar, simVar, simVar * .1, debug=true)
+    assertApprox(xMean, trueMean, trueMean * .1, debug=true)
+  }
+
+  testWithMsg("Random wsampleIndex") {/*TODO*/}
+  testWithMsg("Random Dirichlet") {
+    // TODO: Other tests
+    val x = rdir(Vector(2000,1000,1000))
+    assertApprox(x.sum, 1, 1E-6)
+  }
+  testWithMsg("Random MVNormal") {}
 
   println 
 }

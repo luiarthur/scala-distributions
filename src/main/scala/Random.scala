@@ -20,6 +20,7 @@ package distributions
 trait RandomGeneric {
   // See common distributions to implement
   //http://commons.apache.org/proper/commons-math/javadocs/api-3.6/org/apache/commons/math3/random/RandomDataGenerator.html
+  import org.apache.commons.math3.special.Gamma.{logGamma => lgamma}
 
   val R: RandomGenerator
 
@@ -137,14 +138,47 @@ trait RandomGeneric {
 
 
   // Discrete univariate
+  def rpoisKnuth(lam:Double):Int = {
+    val L = math.exp(-lam)
+
+    def engine(k:Int=0, p:Double=1): Int = {
+      if (p > L) {
+        engine(k+1, p*rU) 
+      } else k-1
+    }
+
+    engine()
+  }
+
+  def rpoisAccRej(lam:Double):Int = {
+    val c = 0.767 - 3.36/lam
+    val beta = math.Pi / math.sqrt(3.0 * lam)
+    val alpha = beta * lam
+    val k = math.log(c) - lam - math.log(beta)
+    def engine(): Int = {
+      val u = rU()
+      val x = (alpha - math.log(1/u - 1)) / beta
+      val n = math.floor(x)
+      if (n < 0) engine() else {
+        val v = rU()
+        val y = alpha - beta * x
+        val lhs = y + math.log(v) - 2 * math.log(1 + math.exp(y))
+        val rhs = k + n * math.log(lam) - lgamma(n + 1)
+        if (lhs <= rhs) n.toInt else engine()
+      }
+    }
+    engine()
+  }
+
   def rpois(lam:Double):Int = {
-    //https://www.johndcook.com/blog/2010/06/14/generating-poisson-random-values/???
-    ???
+    //https://www.johndcook.com/blog/2010/06/14/generating-poisson-random-values/
+    require(lam > 0)
+    if (lam < 30) rpoisKnuth(lam) else rpoisAccRej(lam)
   }
 
   def rnegbinom(numSuccess:Double, probSuccess:Double):Int = {
     // numSuccess: target for number of successful trials (>0)
-    // mean: numSuccess * (1.probSuccess) / probSuccess
+    // mean: numSuccess * (1-probSuccess) / probSuccess
     // samples: number of failures that occur before `r` successes are reached
     // TODO: Test using bernoulli trials!
     rpois(rgamma(shape=numSuccess, rate=probSuccess/(1-probSuccess)))
@@ -154,11 +188,31 @@ trait RandomGeneric {
     rnegbinom(1, p)
   }
 
-  def wsampleIndex(prob:IndexedSeq[Double]): Int = ???
-  def wsampleIndexByLogProb(logProb:IndexedSeq[Double]): Int = ???
+  def wsampleIndex(prob:IndexedSeq[Double]): Int = {
+    val pSum = prob.sum
+    val u = rU() * pSum
+
+    def engine(cumsum:Double=0, p:IndexedSeq[Double]=prob, i:Int=0):Int = {
+      if (cumsum < u) {
+        engine(cumsum + p.head, p.tail, i+1)
+      } else i
+    }
+
+    engine()
+  }
+  def wsampleIndexByLogProb(logProb:IndexedSeq[Double]): Int = {
+    val logProbMax = logProb.max
+    val prob = logProb.map(_ - logProbMax)
+    wsampleIndex(prob)
+  }
 
   // multivariate
-  def rdir(x:IndexedSeq[Double]): IndexedSeq[Double] = ???
+  def rdir(a:IndexedSeq[Double]): IndexedSeq[Double] = {
+    lazy val x = a.map{ai => rgamma(ai, 1)}
+    lazy val xSum = x.sum
+    x.map{_ / xSum}
+  }
+
   def rmvnorm(m:IndexedSeq[Double], cov:IndexedSeq[IndexedSeq[Double]]): IndexedSeq[Double] = ???
 }
 
