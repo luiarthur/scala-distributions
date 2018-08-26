@@ -222,7 +222,7 @@ trait RandomGeneric {
     x.map{_ / xSum}
   }
 
-  /* Commons Math version
+  /* Commons Math version. (1.75x speed slowdown from Personal Version1)
   import org.apache.commons.math3.linear.{
     Array2DRowRealMatrix, ArrayRealVector, CholeskyDecomposition
   }
@@ -236,17 +236,40 @@ trait RandomGeneric {
   }
   */
   
-  /* Personal Version 
-  */
+  // Personal Version 
+  /* @param m: mean
+   * @param cov: covariance matrix
+   * @return sample from multivariate normal
+   */
   def rmvnorm(m:Array[Double], cov:Array[Array[Double]]): Array[Double] = {
-    // LL' = covMat
-    // z ~ N(0, I)
-    // x = m + L*z
+    /* Basic idea:
+     *
+     * LL' = covMat
+     * z ~ N(0, I)
+     * x = m + L*z
+     */
+
+    // Version1
     lazy val n = m.size
     lazy val z = Array.fill(n){Rand.nextGaussian}
     lazy val L = choleskyL(cov)
     vvAdd(m, mvMult(L, z))
+
+    // Version2 (twice as slow as version 1)
+    //Linalg.rmvnorm(m, cov)
+
+    // Version3 (way slow)
+    //val n = m.size
+    //val L = choleskyL(cov)
+    //Array.tabulate(n){ i => {
+    //  def engine(j:Int=0, s:Double=0): Double = j match {
+    //    case j if j == i + 1 => s
+    //    case j => engine(j + 1, L(i)(j) * Rand.nextGaussian + s)
+    //  }
+    //  engine() + m(i) 
+    //}}
   }
+
 }
 
 object Random extends RandomGeneric {

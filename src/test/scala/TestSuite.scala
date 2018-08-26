@@ -19,7 +19,7 @@ class TestSuite extends MyFunSuite {
 
   // Use scala.util.Rnadom instead
   import distributions._RandomTest._
-  Rand.setSeed(11)
+  Rand.setSeed(10)
 
   //val commonsMathR = new RandomDataGenerator()
 
@@ -139,7 +139,7 @@ class TestSuite extends MyFunSuite {
     //val testShape = (0.1 to 2.0 by 0.1).toList.map(round(_, 1))
     val testShape = List(0.1, 1.0, 2.0)
     val testRate = List(0.1, 1.0, 2.0)
-    val niter = 1E6.toInt
+    val niter = 5E5.toInt
 
     for (shape <- testShape; rate <- testRate) {
       val x = Vector.fill(niter){ rgamma(shape, rate) }
@@ -158,8 +158,8 @@ class TestSuite extends MyFunSuite {
   }
 
   testWithMsg("Random Inverse Gamma") {
-    val testA = (2.1 to 3.0 by 0.1).toList.map(round(_, 1))
-    val testB = (2.1 to 3.0 by 0.1).toList.map(round(_,1))
+    val testA = List(2.1, 2.5, 3.0).map(round(_, 1))
+    val testB = List(2.1, 2.5, 3.0).map(round(_,1))
     val niter = 1E5.toInt
 
     for (a <- testA; b <- testB) {
@@ -171,8 +171,10 @@ class TestSuite extends MyFunSuite {
   }
 
   testWithMsg("Random Beta") {
-    val testA = (1.1 to 3.0 by 0.1).toList.map(round(_, 1))
-    val testB = (1.1 to 3.0 by 0.1).toList.map(round(_,1))
+    //val testA = (1.1 to 3.0 by 0.1).toList.map(round(_, 1))
+    //val testB = (1.1 to 3.0 by 0.1).toList.map(round(_,1))
+    val testA = List(1.1, 2.0, 3.0).map(round(_, 1))
+    val testB = List(1.1, 2.0, 3.0).map(round(_,1))
     val niter = 1E4.toInt
 
     lazy val ab = {for (a <- testA; b <- testB) yield (a,b)}.toList
@@ -217,15 +219,14 @@ class TestSuite extends MyFunSuite {
   testWithMsg("Random F") {
     val niter = 1E6.toInt
     val (d1, d2) = (3.0, 5.0)
-    if (d2 > 4) {
-      val x = Vector.fill(niter){ rF(d1, d2) }
-      val xMean = mean(x)
-      val trueMean = d2 / (d2-2) 
-      val xVar = variance(x)
-      val trueVar = 2 * d2*d2 * (d1+d2-2) / (d1 * math.pow(d2-2, 2) * (d2-4))
-      assertApprox(xMean, trueMean, trueMean * .1)
-      assertApprox(xVar, trueVar, trueVar * .2)
-    }
+    require(d2 > 4.0)
+    val x = Vector.fill(niter){ rF(d1, d2) }
+    val xMean = mean(x)
+    val trueMean = d2 / (d2-2) 
+    val xVar = variance(x)
+    val trueVar = 2 * d2*d2 * (d1+d2-2) / (d1 * math.pow(d2-2, 2) * (d2-4))
+    assertApprox(xMean, trueMean, trueMean * .1)
+    assertApprox(xVar, trueVar, trueVar * .2)
   }
 
 
@@ -293,9 +294,9 @@ class TestSuite extends MyFunSuite {
     // TODO: Other tests
     val a = Vector(2000.0, 1000.0, 1000.0)
     val x = rdir(a)
-    assertApprox(x.sum, 1, 1E-6)
+    assertApprox(x.sum, 1, 1E-5)
     a.indices.foreach{ i =>
-      assertApprox(x(i), a(i)/a.sum, .01, debug=true)
+      assertApprox(x(i), a(i)/a.sum, .02, debug=true)
     }
   }
 
@@ -305,14 +306,16 @@ class TestSuite extends MyFunSuite {
 
   testWithMsg("Random MVNormal") {
     import distributions.SpecialFunctions._
-    val m = Array(1.0, 2.0, 3.0)
-    val covMat = eye(3); covMat(1)(1) = 0.5
-    val n = 1E5.toInt
+    val dim = 30
+    val m = Array.range(0, dim).map(_.toDouble)
+    val covMat = eye(dim); covMat(1)(1) = 0.5
+    val n = 2E5.toInt
     val xs = Array.fill(n)(rmvnorm(m, covMat))
     val xsMean = xs.transpose.map{ x => mean(x.toVector) }
     val xsVar = xs.transpose.map{ x => variance(x.toVector) }
+    val trueVarDiag = covMat.indices.map(i => covMat(i)(i))
     xsMean.zip(m.toVector).foreach{ case (a,b) => assertApprox(a,b,1E-2) }
-    xsVar.zip(Vector(1.0, 0.5, 1.0)).foreach{ case (a,b) => assertApprox(a,b,1E-2) }
+    xsVar.zip(trueVarDiag.toVector).foreach{ case (a,b) => assertApprox(a,b,1E-2) }
   }
 
   println 

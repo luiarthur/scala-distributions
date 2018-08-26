@@ -51,28 +51,24 @@ object SpecialFunctions {
    * @see: https://rosettacode.org/wiki/Cholesky_decomposition   */
   def choleskyL(A: Array[Array[Double]],
                 checkDim:Boolean=false,
-                useJava:Boolean=true): Array[Array[Double]] = {
+                useJava:Boolean=false): Array[Array[Double]] = {
 
     if (checkDim) { require(isSquare(A)) }
 
-    if (useJava) Cholesky.getL(A) else {
+    if (useJava) Linalg.choleskyL(A) else {
       val n = A.size
       val L = Array.ofDim[Double](n,n)
       
       for (i <- 0 until n; j <- 0 to i) {
-        (i,j) match {
-          case (a,b) if a==b => {
-            val x = L(i).take(i).map(lij => lij*lij).sum
-            L(i)(i) = math.sqrt(A(i)(i) - x)
+        val x = {
+          def engine(k:Int=0, out:Double=0):Double = k match {
+            case d if d == j  => out
+            case _ => engine(k + 1, out + L(i)(k) * L(j)(k))
           }
-          case _ => {
-            var x = 0.0
-            for (k <- 0 until j) {
-              x += L(i)(k) * L(j)(k)
-            }
-            L(i)(j) =  (A(i)(j) - x) / L(j)(j)
-          }
+          engine()
         }
+
+        L(i)(j) = if (i == j) math.sqrt(A(i)(i) - x) else (A(i)(j) - x) / L(j)(j)
       }
 
       return(L)
