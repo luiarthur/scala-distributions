@@ -23,7 +23,7 @@ public class Linalg {
     int n = m.length;
     double[] x = new double[n];
     for (int i=0; i<n; i++) {
-      x[i] = m[i];
+      x[i] = m[i] + 0;
       for (int j=0; j<=i; j++) {
         double z = java.util.concurrent.ThreadLocalRandom.current().nextGaussian();
         x[i] += L[i][j] * z;
