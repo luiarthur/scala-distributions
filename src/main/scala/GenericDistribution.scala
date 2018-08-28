@@ -10,6 +10,6 @@ abstract class GenericDistribution(params: Any*) {
   def lcdf(x:RvType): Double = math.log(cdf(x))
   def lccdf(x:RvType): Double = math.log(ccdf(x))
 
-  def samples(n:Int):Vector[RvType] = Vector.tabulate(n){ i => sample }
+  //def samples(n:Int):Vector[RvType] = Vector.tabulate(n){ i => sample }
 }
 
