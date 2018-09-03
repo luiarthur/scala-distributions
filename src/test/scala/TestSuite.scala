@@ -15,13 +15,21 @@ class MyFunSuite extends FunSuite {
 
 class TestSuite extends MyFunSuite {
   // Don't use ThreadLocalRandom for testing (for reproducibility)
-  //import distributions.Random._
+  //import distributions.RandomPar._
 
   // Use scala.util.Rnadom instead
-  import distributions._RandomTest._
-  Rand.setSeed(10)
+  object R extends distributions.RandomSeq(new scala.util.Random(10))
+  import R._
 
   //val commonsMathR = new RandomDataGenerator()
+
+  def round(x:Double, d:Int) = {
+    require(d >= 0)
+    val dMax = x.toString.split('.').last.size
+    val factor = math.pow(10, if(d>dMax) dMax else d)
+    (x * factor).toInt / factor
+  }
+
 
   def mean(x:Vector[Double]) = x.sum / x.size
   def sd(x: Vector[Double]) = {
@@ -111,13 +119,13 @@ class TestSuite extends MyFunSuite {
   testWithMsg("Random Uniform") {
     //import scala.collection.parallel.immutable.ParVector
     val (xmin, xmax) = (2,20)
-    val x = List.fill(n)(runif(2,20))
+    val x = List.fill(n)(nextUniform(2,20))
     assert( x.max < xmax && x.min > xmin)
   }
 
   testWithMsg("Random Normal") {
     val (m,s) = (5,2)
-    val x = Vector.fill(1E6.toInt)(rnorm(m,s))
+    val x = Vector.fill(1E6.toInt)(nextGaussian(m,s))
     val xMean = mean(x)
     val xSd = sd(x)
     assertApprox(xMean, m, m * .01)
@@ -126,7 +134,7 @@ class TestSuite extends MyFunSuite {
 
   testWithMsg("Random Exponential") {
     val lam = 3.0
-    val x = Vector.fill(1E6.toInt)(rexp(lam))
+    val x = Vector.fill(1E6.toInt)(nextExponential(lam))
     val xMean = mean(x)
     val xVar = variance(x)
     val trueMean = 1 / lam
@@ -142,7 +150,7 @@ class TestSuite extends MyFunSuite {
     val niter = 5E5.toInt
 
     for (shape <- testShape; rate <- testRate) {
-      val x = Vector.fill(niter){ rgamma(shape, rate) }
+      val x = Vector.fill(niter){ nextGamma(shape, rate) }
       val xMean = mean(x)
       val xVar = variance(x)
       val trueMean = shape / rate
@@ -154,7 +162,7 @@ class TestSuite extends MyFunSuite {
 
   testWithMsg("Random Gamma Speed") {
     val niter = 1E6.toInt
-    val x = Vector.fill(niter){ rgamma(shape=.2, rate=.3) }
+    val x = Vector.fill(niter){ nextGamma(shape=.2, rate=.3) }
   }
 
   testWithMsg("Random Inverse Gamma") {
@@ -163,7 +171,7 @@ class TestSuite extends MyFunSuite {
     val niter = 1E5.toInt
 
     for (a <- testA; b <- testB) {
-      val x = Vector.fill(niter){ rinvgamma(a, b) }
+      val x = Vector.fill(niter){ nextInverseGamma(a, b) }
       val xMean = mean(x)
       val trueMean = b / (a - 1)
       assertApprox(xMean, trueMean, trueMean/10.0)
@@ -179,7 +187,7 @@ class TestSuite extends MyFunSuite {
 
     lazy val ab = {for (a <- testA; b <- testB) yield (a,b)}.toList
     ab.foreach { case (a,b) => 
-      val x = Vector.fill(niter){ rbeta(a, b) }
+      val x = Vector.fill(niter){ nextBeta(a, b) }
       val xMean = mean(x)
       val trueMean = a / (a + b)
       assertApprox(xMean, trueMean, trueMean/10.0)
@@ -191,7 +199,7 @@ class TestSuite extends MyFunSuite {
     val niter = 1E4.toInt
 
     testNu.foreach { nu => 
-      val x = Vector.fill(niter){ rchisq(nu) }
+      val x = Vector.fill(niter){ nextChisq(nu) }
       val xMean = mean(x)
       val xVar = variance(x)
       val trueMean = nu
@@ -206,7 +214,7 @@ class TestSuite extends MyFunSuite {
     val niter = 1E4.toInt
 
     testNu.foreach { nu => 
-      val x = Vector.fill(niter){ rtdist(nu) }
+      val x = Vector.fill(niter){ nextT(nu) }
       val xMean = mean(x)
       val xVar = variance(x)
       val trueMean = 0
@@ -220,7 +228,7 @@ class TestSuite extends MyFunSuite {
     val niter = 1E6.toInt
     val (d1, d2) = (3.0, 5.0)
     require(d2 > 4.0)
-    val x = Vector.fill(niter){ rF(d1, d2) }
+    val x = Vector.fill(niter){ nextF(d1, d2) }
     val xMean = mean(x)
     val trueMean = d2 / (d2-2) 
     val xVar = variance(x)
@@ -235,7 +243,7 @@ class TestSuite extends MyFunSuite {
     import math.pow
     val niter = 1E6.toInt
     val (shape, scale) = (3.0, 5.0)
-    val x = Vector.fill(niter){ rweibull(shape, scale) }
+    val x = Vector.fill(niter){ nextWeibull(shape, scale) }
     val xMean = mean(x)
     val trueMean = scale * gammaFunction(1 + 1/shape)
     val xVar = variance(x)
@@ -248,7 +256,7 @@ class TestSuite extends MyFunSuite {
     val niter = 1E6.toInt
     val testLam = List(3,40)
     testLam.foreach{lam => 
-      val x = Vector.fill(niter)(rpois(lam).toDouble)
+      val x = Vector.fill(niter)(nextPoisson(lam).toDouble)
       val xMean = mean(x)
       val xVar = variance(x)
       val trueMean, trueVar = lam
@@ -260,14 +268,14 @@ class TestSuite extends MyFunSuite {
   testWithMsg("Random Negative Binomial") {
     def numFailuresTillSuccesses(n:Int, p:Double, numSuccesses:Int=0, numFailures:Int=0): Int = {
       if (numSuccesses == n) numFailures else {
-        val success = rbern(p)
+        val success = nextBernoulli(p)
         numFailuresTillSuccesses(n, p, numSuccesses+success, numFailures+(1-success))
       }
     }
     val testN = 5
     val testP = .3
     val niter = 1E6.toInt
-    val x = Vector.fill(niter)(rnegbinom(testN, testP).toDouble)
+    val x = Vector.fill(niter)(nextNegativeBinomial(testN, testP).toDouble)
     val xMean = mean(x)
     val xVar = variance(x)
     val y = Vector.fill(niter)(numFailuresTillSuccesses(testN, testP).toDouble)
@@ -293,7 +301,7 @@ class TestSuite extends MyFunSuite {
   testWithMsg("Random Dirichlet") {
     // TODO: Other tests
     val a = Vector(2000.0, 1000.0, 1000.0)
-    val x = rdir(a)
+    val x = nextDirichlet(a)
     assertApprox(x.sum, 1, 1E-5)
     a.indices.foreach{ i =>
       assertApprox(x(i), a(i)/a.sum, .02, debug=true)
@@ -301,7 +309,7 @@ class TestSuite extends MyFunSuite {
   }
 
   testWithMsg("nextInt") {
-    val x = Rand.nextInt(10)
+    val x = R.nextInt(10)
   }
 
   testWithMsg("Random MVNormal") {
@@ -310,7 +318,7 @@ class TestSuite extends MyFunSuite {
     val m = Array.range(0, dim).map(_.toDouble)
     val covMat = eye(dim); covMat(1)(1) = 0.5
     val n = 2E5.toInt
-    val xs = Array.fill(n)(rmvnorm(m, covMat))
+    val xs = Array.fill(n)(nextMvNormal(m, covMat))
     val xsMean = xs.transpose.map{ x => mean(x.toVector) }
     val xsVar = xs.transpose.map{ x => variance(x.toVector) }
     val trueVarDiag = covMat.indices.map(i => covMat(i)(i))

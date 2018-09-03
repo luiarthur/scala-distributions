@@ -23,5 +23,5 @@ case class Normal(params: (Double,Double)) extends GenericDistribution(params) {
     s"Normal(mean:$mean, sd:$sd)"
   }
 
-  def sample() = distributions.Random.rnorm(mean, sd)
+  def sample() = distributions.RandomPar.nextGaussian(mean, sd)
 }
