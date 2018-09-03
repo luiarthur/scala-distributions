@@ -1,8 +1,9 @@
 package distribution.continuous
 
-import distribution.GenericDistribution
+import distribution.Distribution
+import distribution.RandomGeneric
 
-case class Normal(params: (Double,Double)) extends GenericDistribution(params) {
+case class Normal(params: (Double,Double)) extends Distribution(params) {
   type RvType = Double
 
   def this(mean:Double, sd:Double) {
@@ -11,9 +12,8 @@ case class Normal(params: (Double,Double)) extends GenericDistribution(params) {
 
   val (mean, sd) = params
 
-  override def lpdf(x:Double) = {
-    val z = (x - mean) / sd
-    -0.5 * math.log(2*math.Pi) - z*z / 2
+  override def lpdf(x:Double) = (mean, sd) match {
+    case (0, 1) => -0.5 * math.log(2*math.Pi) - math.pow((x - mean) / sd, 2) / 2
   }
 
   def pdf(x:Double):Double = math.exp(lpdf(x))
@@ -23,5 +23,7 @@ case class Normal(params: (Double,Double)) extends GenericDistribution(params) {
     s"Normal(mean:$mean, sd:$sd)"
   }
 
-  def sample() = distribution.RandomPar.nextGaussian(mean, sd)
+  def sample[Rng <: distribution.RandomGeneric](rng: Rng):Double = {
+    rng.nextGaussian(mean, sd)
+  }
 }

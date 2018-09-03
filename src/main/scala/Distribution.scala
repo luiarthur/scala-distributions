@@ -1,8 +1,8 @@
 package distribution
 
-abstract class GenericDistribution(params: Any*) {
+abstract class Distribution(params: Any*) {
   type RvType 
-  def sample: RvType
+  def sample[Rng <: distribution.RandomGeneric](rng:Rng): RvType
   def pdf(x:RvType): Double
   def cdf(x:RvType): Double
   def ccdf(x:RvType): Double = 1 - cdf(x)
