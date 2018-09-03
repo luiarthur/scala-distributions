@@ -1,5 +1,5 @@
 import org.scalatest.FunSuite
-import distributions.helper.timer
+import distribution.helper.timer
 import org.apache.commons.math3.random.RandomDataGenerator
 
 class MyFunSuite extends FunSuite {
@@ -14,11 +14,11 @@ class MyFunSuite extends FunSuite {
 }
 
 class TestSuite extends MyFunSuite {
-  // Don't use ThreadLocalRandom for testing (for reproducibility)
-  //import distributions.RandomPar._
+  // For reproducibility, don't use ThreadLocalRandom for testing.
+  //import distribution.RandomPar._
 
   // Use scala.util.Rnadom instead
-  object R extends distributions.RandomSeq(new scala.util.Random(10))
+  object R extends distribution.RandomSeq(new scala.util.Random(10))
   import R._
 
   //val commonsMathR = new RandomDataGenerator()
@@ -49,8 +49,14 @@ class TestSuite extends MyFunSuite {
     assert(valid)
   }
 
+  def assertApproxArray(a:Array[Double], b:Array[Double], eps:Double=1E-3, debug:Boolean=false): Unit = {
+    a.zip(b).foreach{ case(ai, bi) =>
+      assertApprox(ai, bi, eps)
+    }
+  }
+
   def assertApproxMat(a:Array[Array[Double]], b:Array[Array[Double]], eps:Double=1E-3, debug:Boolean=false): Unit = {
-    import distributions.SpecialFunctions.printMat
+    import distribution.SpecialFunctions.printMat
 
     val matA = a.flatten
     val matB = b.flatten
@@ -63,7 +69,7 @@ class TestSuite extends MyFunSuite {
   println
 
   testWithMsg("choleskyL") {
-    import distributions.SpecialFunctions._
+    import distribution.SpecialFunctions._
     val mat = Array(Array(25.0, 15.0, -5.0), 
                     Array(15.0, 18.0,  0.0),
                     Array(-5.0,  0.0, 11.0))
@@ -98,7 +104,7 @@ class TestSuite extends MyFunSuite {
   }
 
   testWithMsg("vvMult") {
-    import distributions.SpecialFunctions._
+    import distribution.SpecialFunctions._
     val a = Array(1.0, 2.0 ,3.0)
     val b = Array(2.0, 3.0 ,4.0)
     val c = vvMult(a, b)
@@ -106,7 +112,7 @@ class TestSuite extends MyFunSuite {
   }
 
   testWithMsg("isSquare") {
-    import distributions.SpecialFunctions._
+    import distribution.SpecialFunctions._
     val squareMat = Array.ofDim[Double](5,5)
     assert( isSquare(squareMat) )
 
@@ -309,11 +315,11 @@ class TestSuite extends MyFunSuite {
   }
 
   testWithMsg("nextInt") {
-    val x = R.nextInt(10)
+    val x = nextInt(10)
   }
 
   testWithMsg("Random MVNormal") {
-    import distributions.SpecialFunctions._
+    import distribution.SpecialFunctions._
     val dim = 30
     val m = Array.range(0, dim).map(_.toDouble)
     val covMat = eye(dim); covMat(1)(1) = 0.5
@@ -325,6 +331,46 @@ class TestSuite extends MyFunSuite {
     xsMean.zip(m.toVector).foreach{ case (a,b) => assertApprox(a,b,1E-2) }
     xsVar.zip(trueVarDiag.toVector).foreach{ case (a,b) => assertApprox(a,b,1E-2) }
   }
+
+  testWithMsg("Random nextMultinomial") {
+    val m = 1E6.toInt
+    val prob = Array(2.0, 3.0, 4.0)
+    val draw = nextMultinomial(m, prob)
+    val drawNormalized = draw.map{ _.toDouble / m }
+    val trueProp = prob.map{ p => p / prob.sum }
+    assert(draw.sum == m)
+    assertApproxArray(drawNormalized, trueProp, 1E-2, debug=true)
+  }
+
+  /*
+  testWithMsg("Apache Speed Test") {
+    import org.apache.commons.math3.random.{ MersenneTwister => Rng }
+    object AR extends distribution.RandomApache(new Rng(10))
+    val AF = new org.apache.commons.math3.random.RandomDataGenerator
+
+    val n = 1E6.toInt
+    val idx = (0 until n)
+
+    timer{ print("Beta mine:   "); idx.foreach{ _ => nextBeta(3, 5) } }
+    timer{ print("Beta apache fast: "); idx.foreach{ _ => AF.nextBeta(3, 5) } }
+    timer{ print("Beta apache: "); idx.foreach{ _ => AR.nextBeta(3, 5) } }
+    println
+
+    timer{ print("Gamma mine:   "); idx.foreach{ _ => nextGamma(3, 5) } }
+    timer{ print("Gamma apache fast: "); idx.foreach{ _ => AF.nextGamma(3, 5) } }
+    timer{ print("Gamma apache: "); idx.foreach{ _ => AR.nextGamma(3, 5) } }
+    println
+
+    import distribution.SpecialFunctions.eye
+    val m = Array.fill(10)(0.0)
+    val S = eye(10)
+    timer{ print("MVN mine:   "); idx.foreach{ _ => nextMvNormal(m, S) } }
+    //timer{ print("MVN apache fast: "); idx.foreach{ _ => AF.nextMvNormal(m, S) } }
+    timer{ print("MVN apache: "); idx.foreach{ _ => AR.nextMvNormal(m, S) } }
+    println
+  }
+  */
+
 
   println 
 }

@@ -1,4 +1,4 @@
-package distributions
+package distribution
 
 object SpecialFunctions {
   def eye(n:Int):Array[Array[Double]] = {

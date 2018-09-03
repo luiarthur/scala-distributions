@@ -1,4 +1,4 @@
-package distributions;
+package distribution;
 
 // These implementations are here for reference. They're not currently used.
 

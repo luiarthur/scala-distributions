@@ -1,4 +1,4 @@
-package distributions
+package distribution
 import scala.annotation.tailrec
 
 /* Notes:
@@ -203,7 +203,9 @@ trait RandomGeneric {
     nextNegativeBinomial(1, p)
   }
 
-  def wsampleIndex(prob:IndexedSeq[Double]): Int = {
+  def wsampleIndex(prob:IndexedSeq[Double], check:Boolean=true): Int = {
+    if (check) prob.foreach{ p => require(p >= 0) }
+
     val pSum = prob.sum
     val u = nextDouble() * pSum
 
@@ -281,26 +283,18 @@ trait RandomGeneric {
   }
 
   // Multivariate Discrete
-  def nextMultinomial(p: IndexedSeq[Double]): IndexedSeq[Double] = ???
-}
+  def nextMultinomial(m: Int, prob: Array[Double], check:Boolean=true): Array[Int] = {
+    require(m >= 0, "In nextMultinomial(m, p): m >= 0 required!")
+    if (check) prob.foreach{ p => require(p >= 0) }
 
-class RandomSeq(rng: scala.util.Random) extends RandomGeneric {
-  def setSeed(seed:Long):Unit = rng.setSeed(seed)
-  def nextBoolean(): Boolean = rng.nextBoolean()
-  def nextInt(n:Int):Int = rng.nextInt(n)
-  def nextLong(): Long = rng.nextLong()
-  def nextFloat(): Float = rng.nextFloat()
-  def nextDouble():Double = rng.nextDouble
-}
+    val dim = prob.length
+    val draw = Array.ofDim[Int](dim)
+    (0 until m).foreach{ i =>
+      val idx = wsampleIndex(prob)
+      draw(idx) += 1
+    }
 
-object RandomPar extends RandomGeneric {
-  import java.util.concurrent.{ ThreadLocalRandom => rng }
-  def setSeed(seed:Long):Unit = rng.current().setSeed(seed)
-  def nextBoolean(): Boolean = rng.current().nextBoolean()
-  def nextInt(n:Int):Int = rng.current().nextInt(n)
-  def nextLong(): Long = rng.current().nextLong()
-  def nextFloat(): Float = rng.current().nextFloat()
-  def nextDouble():Double = rng.current().nextDouble
+    draw
+  }
 }
-
 

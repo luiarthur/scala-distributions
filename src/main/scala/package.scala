@@ -1,4 +1,4 @@
-package distributions
+package distribution
 
 object helper {
 

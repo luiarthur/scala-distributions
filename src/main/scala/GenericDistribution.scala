@@ -1,4 +1,4 @@
-package distributions
+package distribution
 
 abstract class GenericDistribution(params: Any*) {
   type RvType 

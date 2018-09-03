@@ -1,6 +1,6 @@
-package distributions.continuous
+package distribution.continuous
 
-import distributions.GenericDistribution
+import distribution.GenericDistribution
 
 case class Normal(params: (Double,Double)) extends GenericDistribution(params) {
   type RvType = Double
@@ -23,5 +23,5 @@ case class Normal(params: (Double,Double)) extends GenericDistribution(params) {
     s"Normal(mean:$mean, sd:$sd)"
   }
 
-  def sample() = distributions.RandomPar.nextGaussian(mean, sd)
+  def sample() = distribution.RandomPar.nextGaussian(mean, sd)
 }
