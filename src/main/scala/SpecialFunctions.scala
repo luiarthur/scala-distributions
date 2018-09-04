@@ -84,4 +84,12 @@ object SpecialFunctions {
       println()
     })
   }
+
+  def logChoose(n:Int, k:Int): Double = {
+    logFactorial(n) - logFactorial(n - k) - logFactorial(k)
+  }
+
+  def choose(n:Int, k:Int): Int = {
+    math.round(math.exp(logChoose(n, k)).toFloat)
+  }
 }
