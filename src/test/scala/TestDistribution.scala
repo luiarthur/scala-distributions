@@ -45,5 +45,20 @@ class TestDistribution extends TestUtil {
     assertApprox(d.pdf(3), .3456)
     assertApprox(d.cdf(3), .66304)
   }
+
+  testWithMsg("Negative Binomial") {
+    import distribution.discrete.NegativeBinomial
+    val p = 0.6
+    val n = 5
+    val d = new NegativeBinomial(n, p)
+
+
+    // Assertions
+    println("HERE" + d.pdf(3))
+    println("HERE" + d.cdf(3))
+    assertApprox(d.pdf(3), .1741824, debug=true)
+    assertApprox(d.cdf(3), .5940864, debug=true)
+  }
+
 }
 

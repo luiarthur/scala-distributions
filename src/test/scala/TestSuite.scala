@@ -219,6 +219,8 @@ class TestSuite extends TestUtil {
   }
 
   testWithMsg("Random Negative Binomial") {
+    import distribution.discrete.NegativeBinomial
+
     def numFailuresTillSuccesses(n:Int, p:Double, numSuccesses:Int=0, numFailures:Int=0): Int = {
       if (numSuccesses == n) numFailures else {
         val success = nextBernoulli(p)
@@ -234,10 +236,13 @@ class TestSuite extends TestUtil {
     val y = Vector.fill(niter)(numFailuresTillSuccesses(testN, testP).toDouble)
     val simMean = mean(y)
     val simVar = variance(y)
-    val trueMean = testN * (1-testP) / testP
+    //val trueMean = testN * (1-testP) / testP
+    val trueMean = NegativeBinomial(testN, testP).mean
+    val trueVar = NegativeBinomial(testN, testP).variance
     assertApprox(xMean, simMean, simMean * .1, debug=false)
     assertApprox(xVar, simVar, simVar * .1, debug=false)
     assertApprox(xMean, trueMean, trueMean * .1, debug=false)
+    assertApprox(xVar, trueVar, trueMean * .1, debug=false)
   }
 
   testWithMsg("Random wsampleIndex") {

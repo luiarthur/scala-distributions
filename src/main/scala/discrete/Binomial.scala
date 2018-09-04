@@ -2,7 +2,7 @@ package distribution.discrete
 
 import distribution.Distribution
 import distribution.RandomGeneric
-import distribution.SpecialFunctions.{choose, logChoose}
+import distribution.SpecialFunctions.logChoose
 import org.apache.commons.math3.special.Beta.regularizedBeta
 
 // TODO: Test
