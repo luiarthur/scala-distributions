@@ -28,7 +28,7 @@ case class Binomial(params: (Int,Double)) extends Distribution(params) {
   def cdf(x:Int): Double = {
     def engine(i:Int=x, out:Double=0): Double =  x match {
       case y if y >= n => 1
-      case y if y >= 0  && y < n => engine(i - 1, pdf(i))
+      case y if y >= 0 => engine(i - 1, pdf(i) + out)
       case _ => out
     }
     
