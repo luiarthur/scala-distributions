@@ -2,10 +2,11 @@ package distribution
 
 abstract class Distribution(params: Any*) {
   type RvType 
+  type meanType
+  type varType
 
-  val mean:Double
-  val variance:Double
-  val sd:Double = math.sqrt(variance)
+  val mean: meanType
+  val variance: varType
 
   def sample[Rng <: distribution.RandomGeneric](rng:Rng): RvType
   def pdf(x:RvType): Double

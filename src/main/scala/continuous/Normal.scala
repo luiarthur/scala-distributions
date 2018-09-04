@@ -6,12 +6,14 @@ import org.apache.commons.math3.special.Erf.erf
 
 case class Normal(params: (Double,Double)=(0,1)) extends Distribution(params) {
   type RvType = Double
+  type meanType = Double
+  type varType = Double
 
   def this(mean:Double, sd:Double) {
     this( (mean, sd) )
   }
 
-  override val (mean, sd) = params
+  val (mean, sd) = params
   val variance = sd * sd
 
   override def lpdf(x:Double):Double = {
