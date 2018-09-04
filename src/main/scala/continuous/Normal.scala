@@ -11,7 +11,8 @@ case class Normal(params: (Double,Double)=(0,1)) extends Distribution(params) {
     this( (mean, sd) )
   }
 
-  val (mean, sd) = params
+  override val (mean, sd) = params
+  val variance = sd * sd
 
   override def lpdf(x:Double):Double = {
     lazy val z = (x - mean) / sd
