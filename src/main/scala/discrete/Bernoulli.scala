@@ -9,7 +9,7 @@ case class Bernoulli(params: Double) extends Distribution(params) {
   type varType = Double
 
   val p = params
-  require(p >= 0 && p <= 1, "In Bernoulli(p): 0 <= p <= 1 required!")
+  //require(p >= 0 && p <= 1, "In Bernoulli(p): 0 <= p <= 1 required!")
 
   val mean = p
   val variance = p * (1 - p)

@@ -5,6 +5,7 @@ import distribution.RandomGeneric
 import org.apache.commons.math3.special.Erf.erf
 
 case class Normal(params: (Double,Double)=(0,1)) extends Distribution(params) {
+
   type RvType = Double
   type meanType = Double
   type varType = Double
@@ -14,6 +15,8 @@ case class Normal(params: (Double,Double)=(0,1)) extends Distribution(params) {
   }
 
   val (mean, sd) = params
+  //require(sd > 0, "In Normal(mean, sd): sd > 0 required!")
+
   val variance = sd * sd
 
   override def lpdf(x:Double):Double = {

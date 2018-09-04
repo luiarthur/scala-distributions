@@ -3,6 +3,7 @@ package distribution.discrete
 import distribution.Distribution
 import distribution.RandomGeneric
 import distribution.SpecialFunctions.{choose, logChoose}
+import org.apache.commons.math3.special.Beta.regularizedBeta
 
 // TODO: Test
 case class Binomial(params: (Int,Double)) extends Distribution(params) {
@@ -11,8 +12,8 @@ case class Binomial(params: (Int,Double)) extends Distribution(params) {
   type varType = Double
 
   val (n, p) = params
-  require(p >= 0 && p <= 1, "In Binomial(n, p): 0 <= p <= 1 required!")
-  require(n >= 0, "Int Binomial(n, p): n >= 0 requried!")
+  //require(p >= 0 && p <= 1, "In Binomial(n, p): 0 <= p <= 1 required!")
+  //require(n >= 0, "Int Binomial(n, p): n >= 0 requried!")
 
   val mean = n * p
   val variance = n * p * (1 - p)
@@ -26,13 +27,17 @@ case class Binomial(params: (Int,Double)) extends Distribution(params) {
   }
 
   def cdf(x:Int): Double = {
-    def engine(i:Int=x, out:Double=0): Double = i match {
-      case y if y >= n => 1
-      case y if y >= 0 => engine(i - 1, pdf(i) + out)
-      case _ => out
-    }
-    
-    engine()
+    // The definition method.
+    //def engine(i:Int=x, out:Double=0): Double = i match {
+    //  case y if y >= n => 1
+    //  case y if y >= 0 => engine(i - 1, pdf(i) + out)
+    //  case _ => out
+    //}
+    //
+    //engine()
+
+    // The constant-time method.
+    regularizedBeta(1 - p, n - x, x + 1)
   }
 
   def sample[Rng <: RandomGeneric](rng:Rng): RvType = {
