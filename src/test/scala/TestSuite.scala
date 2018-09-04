@@ -372,17 +372,20 @@ class TestSuite extends MyFunSuite {
   */
 
   // TODO
-  //testWithMsg("Distribution Speed") {
-  //  val Normal = new distribution.continuous.Normal(0, 1)
-  //  val rng = distribution.RandomSeq(new scala.util.Random(10))
+  testWithMsg("new Distribution vs direct random Speed") {
+    import distribution.continuous.Normal
+    R.setSeed(10)
+    val rng = new distribution.RandomSeq(new scala.util.Random(10))
 
-  //  val n = 1E6.toInt
-  //  val idx = (0 until n)
-  //  println
-  //  timer{ print("Random:         "); idx.foreach{ _ => nextGaussian(0, 1) } }
-  //  timer{ print("Distribution:   "); idx.foreach{ _ => Normal.sample(rng) } }
-  //  println
-  //}
+    assert(nextGaussian() == (new Normal()).sample(rng))
+
+    val n = 1E6.toInt
+    val idx = (0 until n)
+    println
+    timer{ print("Distribution:   "); idx.foreach{ _ => (new Normal(2, 3)).sample(rng) } }
+    timer{ print("Random:         "); idx.foreach{ _ => nextGaussian(2, 3) } }
+    println
+  }
  
   println 
 }
