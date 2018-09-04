@@ -136,6 +136,7 @@ trait RandomGeneric {
     }
   }
 
+  def nextLogNormal: Double = ???
 
   // Univariate Discrete
   def nextBernoulli(p: Double): Int = {
