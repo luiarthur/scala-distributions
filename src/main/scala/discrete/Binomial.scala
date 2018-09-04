@@ -4,6 +4,7 @@ import distribution.Distribution
 import distribution.RandomGeneric
 import distribution.SpecialFunctions.{choose, logChoose}
 
+// TODO: Test
 case class Binomial(params: (Int,Double)) extends Distribution(params) {
   type RvType = Int
   type meanType = Double
@@ -25,15 +26,13 @@ case class Binomial(params: (Int,Double)) extends Distribution(params) {
   }
 
   def cdf(x:Int): Double = {
-    ???
-    //def engine(i:Int=x, out:Double=0): Double =  x match {
-    //  case y if y >= n => 1
-    //  case y if y > 0  && y < n => cdf(i - 1, pdf(i))
-    //  case 0
-    //  case y if y < 0 => 0
-    //}
-    //
-    //engine()
+    def engine(i:Int=x, out:Double=0): Double =  x match {
+      case y if y >= n => 1
+      case y if y >= 0  && y < n => engine(i - 1, pdf(i))
+      case _ => out
+    }
+    
+    engine()
   }
 
   def sample[Rng <: RandomGeneric](rng:Rng): RvType = {
