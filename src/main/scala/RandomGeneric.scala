@@ -93,9 +93,9 @@ trait RandomGeneric {
     }
   }
 
-  def nextInverseGamma(shape:Double, rate:Double): Double = {
-    require(shape > 0 && rate > 0, "In nextInverseGamma(shape, rate): shape > 0 & rate > 0 required!")
-    1 / nextGamma(shape, rate)
+  def nextInverseGamma(shape:Double, scale:Double): Double = {
+    require(shape > 0 && scale > 0, "In nextInverseGamma(shape, scale): shape > 0 & rate > 0 required!")
+    1 / nextGamma(shape, scale)
   }
 
   def nextBeta(a:Double, b:Double): Double = {

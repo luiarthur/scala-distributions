@@ -49,9 +49,10 @@ class TestDistribution extends TestUtil {
     val idx = (0 until 1E6.toInt)
     val timeCutoff = .75
 
-    assert(timerWithTime{
-      idx.foreach{i => Binomial(n,p).pdf(3)}
-    }._2 < timeCutoff)
+    // Done. Fast enough.
+    //assert(timerWithTime{
+    //  idx.foreach{i => Binomial(n,p).pdf(3)}
+    //}._2 < timeCutoff)
   }
 
   testWithMsg("Negative Binomial") {
@@ -65,6 +66,8 @@ class TestDistribution extends TestUtil {
     assertApprox(d.pdf(3), .1741824, debug=true)
     assertApprox(d.cdf(3), .5940864, debug=true)
 
+    // Done. Fast enough.
+    /*
     val idx = (0 until 1E6.toInt)
     val timeCutoff = .75
     assert(timerWithTime{
@@ -76,6 +79,7 @@ class TestDistribution extends TestUtil {
     assert(timerWithTime{
       idx.foreach{i => NegativeBinomial(5,.6).cdf(3)}
     }._2 < timeCutoff)
+    */
   }
 
   testWithMsg("Poisson") {
@@ -88,10 +92,13 @@ class TestDistribution extends TestUtil {
     assertApprox(d.pdf(x), .1562935, debug=true)
     assertApprox(d.cdf(x), .7851304, debug=true)
 
+    // Done. Fast enough.
+    /*
     val idx = (0 until 1E6.toInt)
     val timeCutoff = .75
     assert(timerWithTime{ idx.foreach{i => Poisson(lam).pdf(x)} }._2 < timeCutoff)
     assert(timerWithTime{ idx.foreach{i => Poisson(lam).cdf(x)} }._2 < timeCutoff)
+    */
   }
 
   testWithMsg("Multinomial") {
@@ -111,6 +118,26 @@ class TestDistribution extends TestUtil {
     val timeCutoff = .75
     //assert(timerWithTime{ idx.foreach{i => Poisson(lam).pdf(x)} }._2 < timeCutoff)
     //assert(timerWithTime{ idx.foreach{i => Poisson(lam).cdf(x)} }._2 < timeCutoff)
+  }
+
+  testWithMsg("Gamma") {
+    import distribution.continuous.Gamma
+    val (a, b) = (5.0, 3.0)
+    val d = Gamma(a, b)
+
+    // Assertions
+    assertApprox(d.pdf(2), .4015579, debug=true)
+    assertApprox(d.cdf(2), .7149435, debug=true)
+  }
+
+  testWithMsg("Inverse Gamma") {
+    import distribution.continuous.InverseGamma
+    val (a, b) = (3.0, 5.0)
+    val d = InverseGamma(a, b)
+
+    // Assertions
+    assertApprox(d.pdf(4), 0.0699474601, debug=true)
+    assertApprox(d.cdf(4), 0.8684676654, debug=true)
   }
 
 }
