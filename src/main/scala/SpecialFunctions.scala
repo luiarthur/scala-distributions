@@ -1,4 +1,5 @@
 package distribution
+import scala.annotation.tailrec
 
 object SpecialFunctions {
   def eye(n:Int):Array[Array[Double]] = {
@@ -6,9 +7,14 @@ object SpecialFunctions {
     Array.tabulate(n)( row => Array.tabulate(n)( col => if (col == row) 1 else 0) )
   }
 
-  def logFactorial(n:Int, _out:Double=0): Double = n match {
-    case 0 => _out
-    case _ => logFactorial(n - 1, math.log(n) + _out)
+  def logFactorial(n:Int): Double = {
+    @tailrec
+    def engine(_n:Int, _out:Double=0):Double = _n match {
+      case 0 => _out
+      case _ => engine(_n - 1, math.log(_n) + _out)
+    }
+
+    engine(n)
   }
 
   def vvMult(v1:Array[Double], v2:Array[Double]): Double = {

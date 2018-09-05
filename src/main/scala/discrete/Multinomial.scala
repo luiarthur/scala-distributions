@@ -5,7 +5,7 @@ import distribution.RandomGeneric
 import distribution.SpecialFunctions._
 
 // TODO: Test
-case class Multinomial(params: (Int,Array[Double])) extends Distribution(params) {
+case class Multinomial(params: (Int, Array[Double])) extends Distribution(params) {
   type RvType = Array[Int]
   type meanType = Array[Double]
   type varType = Array[Array[Double]]
@@ -13,11 +13,16 @@ case class Multinomial(params: (Int,Array[Double])) extends Distribution(params)
   val (m, prob) = params
   //require???
 
-  val mean = ???
-  val variance = ???
+  val mean = prob.map{ _ * m }
+  val K = prob.size
+  val variance = Array.tabulate(K,K){ case (i,j) => 
+    if (i == j) m * prob(i) * (1 - prob(i)) else -m * prob(i) * prob(j)
+  }
 
   override def lpdf(x:RvType): Double = {
-    ???
+    logFactorial(m) - x.map{logFactorial}.sum + x.zip(prob).map{ case (xj,pj) => 
+      xj * math.log(pj)
+    }.sum
   }
 
   def pdf(x:RvType):Double = {
