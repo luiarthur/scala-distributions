@@ -1,5 +1,5 @@
 import org.scalatest.FunSuite
-import distribution.helper.timer
+import distribution.helper.{timer, timerWithTime}
 import org.apache.commons.math3.random.RandomDataGenerator
 
 
@@ -39,26 +39,61 @@ class TestDistribution extends TestUtil {
     import distribution.discrete.Binomial
     val p = 0.6
     val n = 5
-    val d = new Binomial(n, p)
+    val d = Binomial(n, p)
 
     // Assertions
     assertApprox(d.pdf(3), .3456)
     assertApprox(d.cdf(3), .66304)
+
+    // Timings
+    val idx = (0 until 1E6.toInt)
+    val timeCutoff = .75
+
+    assert(timerWithTime{
+      idx.foreach{i => Binomial(n,p).pdf(3)}
+    }._2 < timeCutoff)
   }
 
   testWithMsg("Negative Binomial") {
     import distribution.discrete.NegativeBinomial
     val p = 0.6
     val n = 5
-    val d = new NegativeBinomial(n, p)
+    val d = NegativeBinomial(n, p)
 
 
     // Assertions
-    println("HERE" + d.pdf(3))
-    println("HERE" + d.cdf(3))
     assertApprox(d.pdf(3), .1741824, debug=true)
     assertApprox(d.cdf(3), .5940864, debug=true)
+
+    val idx = (0 until 1E6.toInt)
+    val timeCutoff = .75
+    assert(timerWithTime{
+      idx.foreach{i => NegativeBinomial(5,.6).pdf(3)}
+    }._2 < timeCutoff)
+    assert(timerWithTime{
+      idx.foreach{i => NegativeBinomial(5,.6).lpdf(3)}
+    }._2 < timeCutoff)
+    assert(timerWithTime{
+      idx.foreach{i => NegativeBinomial(5,.6).cdf(3)}
+    }._2 < timeCutoff)
   }
+
+  testWithMsg("Poisson") {
+    import distribution.discrete.Poisson
+    val lam = 4
+    val d = Poisson(lam)
+    val x = 5
+
+    // Assertions
+    assertApprox(d.pdf(x), .1562935, debug=true)
+    assertApprox(d.cdf(x), .7851304, debug=true)
+
+    val idx = (0 until 1E6.toInt)
+    val timeCutoff = .75
+    assert(timerWithTime{ idx.foreach{i => Poisson(lam).pdf(x)} }._2 < timeCutoff)
+    assert(timerWithTime{ idx.foreach{i => Poisson(lam).cdf(x)} }._2 < timeCutoff)
+  }
+
 
 }
 
