@@ -94,6 +94,24 @@ class TestDistribution extends TestUtil {
     assert(timerWithTime{ idx.foreach{i => Poisson(lam).cdf(x)} }._2 < timeCutoff)
   }
 
+  testWithMsg("Multinomial") {
+    import distribution.discrete.Multinomial
+    val m = 10
+    val J = 5
+    lazy val probUnnormalized = Array.tabulate(J){ _.toDouble + 1}
+    val prob = probUnnormalized.map{ _ / probUnnormalized.sum }
+    val d = Multinomial(m, prob)
+
+    val x = Array.range(0, J)
+
+    // Assertions
+    assertApprox(d.pdf(x), 0.01573224, debug=true)
+
+    val idx = (0 until 1E6.toInt)
+    val timeCutoff = .75
+    //assert(timerWithTime{ idx.foreach{i => Poisson(lam).pdf(x)} }._2 < timeCutoff)
+    //assert(timerWithTime{ idx.foreach{i => Poisson(lam).cdf(x)} }._2 < timeCutoff)
+  }
 
 }
 

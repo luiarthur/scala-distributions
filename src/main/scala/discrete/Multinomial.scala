@@ -10,6 +10,10 @@ case class Multinomial(params: (Int, Array[Double])) extends Distribution(params
   type meanType = Array[Double]
   type varType = Array[Array[Double]]
 
+  def this(m: Int, prob:Array[Double]) {
+    this( (m, prob) )
+  }
+
   val (m, prob) = params
   //require???
 
@@ -20,8 +24,8 @@ case class Multinomial(params: (Int, Array[Double])) extends Distribution(params
   }
 
   override def lpdf(x:RvType): Double = {
-    logFactorial(m) - x.map{logFactorial}.sum + x.zip(prob).map{ case (xj,pj) => 
-      xj * math.log(pj)
+    logFactorial(m) - x.map{logFactorial}.sum + x.zip(prob).map{
+      case (xj, pj) => xj * math.log(pj)
     }.sum
   }
 

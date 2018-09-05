@@ -6,7 +6,9 @@ import distribution.SpecialFunctions.logChoose
 import org.apache.commons.math3.special.Beta.regularizedBeta
 
 // TODO: Test
-case class NegativeBinomial(params: (Int,Double)) extends Distribution(params) {
+case class NegativeBinomial(params: (Int, Double)) extends NegativeBinomialBase(params)
+
+class NegativeBinomialBase(params: (Int,Double)) extends Distribution(params) {
   type RvType = Int
   type meanType = Double
   type varType = Double
