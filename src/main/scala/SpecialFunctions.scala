@@ -98,4 +98,27 @@ object SpecialFunctions {
   def choose(n:Int, k:Int): Int = {
     math.round(math.exp(logChoose(n, k)).toFloat)
   }
+
+  def sech(x:Double): Double = {
+    1 / math.cosh(x)
+  }
+
+  def sigmoid(x:Double, a:Double=0, b:Double=1): Double = {
+    require(a <= b)
+    (a, b) match {
+      case (0, 1) => 1 / (1 + math.exp(-x))
+      case _ => {
+        val ex = math.exp(x)
+        (ex * b + a) / (1 + ex)
+      }
+    }
+  }
+
+  def logit(p: Double, a:Double=0, b:Double=1): Double = {
+    require(a <= b)
+    (a, b) match {
+      case (0, 1) => math.log(p) - math.log(1 - p)
+      case _ => math.log(p - a) - math.log(b - b)
+    }
+  }
 }

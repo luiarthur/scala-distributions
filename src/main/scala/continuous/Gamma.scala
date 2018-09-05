@@ -22,12 +22,18 @@ case class Gamma(params: (Double,Double)) extends Distribution(params) {
   val variance = mean / rate
 
   override def lpdf(x:Double):Double = {
-    shape * log(rate) - logGamma(shape) + (shape - 1) * log(x) - rate * x
+    if (x > 0) {
+      shape * log(rate) - logGamma(shape) + (shape - 1) * log(x) - rate * x
+    } else {
+      Double.NegativeInfinity
+    }
   }
 
   def pdf(x:Double):Double = math.exp(lpdf(x))
-  def cdf(x:Double):Double = {
+  def cdf(x:Double):Double = if (x > 0) {
     regularizedGammaP(shape, rate * x)
+  } else {
+    0
   }
 
   override def toString = {

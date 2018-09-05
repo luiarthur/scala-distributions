@@ -182,15 +182,15 @@ class TestSuite extends TestUtil {
 
   testWithMsg("Random F") {
     val niter = 1E6.toInt
-    val (d1, d2) = (3.0, 5.0)
+    val (d1, d2) = (3.0, 10.0)
     require(d2 > 4.0)
     val x = Vector.fill(niter){ nextF(d1, d2) }
     val xMean = mean(x)
     val trueMean = d2 / (d2-2) 
     val xVar = variance(x)
     val trueVar = 2 * d2*d2 * (d1+d2-2) / (d1 * math.pow(d2-2, 2) * (d2-4))
-    assertApprox(xMean, trueMean, trueMean * .5, debug=true)
-    assertApprox(xVar, trueVar, trueVar * .5, debug=true)
+    assertApprox(xMean, trueMean, trueMean * .1, debug=true)
+    assertApprox(xVar, trueVar, trueVar * .1, debug=true)
   }
 
 
@@ -208,6 +208,18 @@ class TestSuite extends TestUtil {
     assertApprox(xVar, trueVar, trueVar * .2)
   }
 
+  testWithMsg("Random Logistic") {
+    val niter = 1E6.toInt
+    val (m, s) = (3.0, 2.0)
+    val x = Vector.fill(niter){ nextLogistic(m, s) }
+    val xMean = mean(x)
+    val trueMean = distribution.continuous.Logistic(m, s).mean
+    val xVar = variance(x)
+    val trueVar = distribution.continuous.Logistic(m, s).variance
+    assertApprox(xMean, trueMean, trueMean * .1)
+    assertApprox(xVar, trueVar, trueVar * .2)
+  }
+ 
   testWithMsg("Random Poisson") {
     val niter = 1E6.toInt
     val testLam = List(3,40)

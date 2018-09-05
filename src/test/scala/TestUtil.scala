@@ -22,11 +22,10 @@ trait TestUtil extends FunSuite {
     }
   }
 
-  def round(x:Double, d:Int) = {
+  def round(x:Double, d:Int):Double = {
     require(d >= 0)
-    val dMax = x.toString.split('.').last.size
-    val factor = math.pow(10, if(d>dMax) dMax else d)
-    (x * factor).toInt / factor
+    val factor = math.pow(10, d)
+    math.round(x.toFloat * factor) / factor
   }
 
 

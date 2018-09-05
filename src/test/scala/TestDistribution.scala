@@ -120,6 +120,7 @@ class TestDistribution extends TestUtil {
     //assert(timerWithTime{ idx.foreach{i => Poisson(lam).cdf(x)} }._2 < timeCutoff)
   }
 
+  // Continuous Distributions
   testWithMsg("Gamma") {
     import distribution.continuous.Gamma
     val (a, b) = (5.0, 3.0)
@@ -128,6 +129,8 @@ class TestDistribution extends TestUtil {
     // Assertions
     assertApprox(d.pdf(2), .4015579, debug=true)
     assertApprox(d.cdf(2), .7149435, debug=true)
+    assertApprox(d.mean, 1.66666666, debug=true)
+    assertApprox(d.variance, 0.555555, debug=true)
   }
 
   testWithMsg("Inverse Gamma") {
@@ -138,7 +141,32 @@ class TestDistribution extends TestUtil {
     // Assertions
     assertApprox(d.pdf(4), 0.0699474601, debug=true)
     assertApprox(d.cdf(4), 0.8684676654, debug=true)
+    assertApprox(d.mean, 2.5, debug=true)
+    assertApprox(d.variance, 6.25, debug=true)
   }
 
+  testWithMsg("Beta") {
+    import distribution.continuous.Beta
+    val (a, b) = (3.0, 5.0)
+    val d = Beta(a, b)
+
+    // Assertions
+    assertApprox(d.pdf(.6), 0.96768, debug=true)
+    assertApprox(d.cdf(.6), 0.90374, debug=true)
+    assertApprox(d.mean, 0.375, debug=true)
+    assertApprox(d.variance, 0.0260416, debug=true)
+  }
+
+  testWithMsg("Logistic") {
+    import distribution.continuous.Logistic
+    val (m, s) = (3.0, 2.0)
+    val d = Logistic(m, s)
+
+    // Assertions
+    assertApprox(d.pdf(4), .117501856, debug=true)
+    assertApprox(d.cdf(4), .62245933120, debug=true)
+    assertApprox(d.mean, 3, debug=true)
+    assertApprox(d.variance, 13.1594725, debug=true)
+  }
 }
 
