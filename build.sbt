@@ -2,7 +2,7 @@ name := "distributions"
 
 version := "0.1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.6"
 
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-math3" % "3.6.1",
