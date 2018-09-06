@@ -1,4 +1,4 @@
-name := "distributions"
+name := "distribution"
 
 version := "0.1.0"
 
