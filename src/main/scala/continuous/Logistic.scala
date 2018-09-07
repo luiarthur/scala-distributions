@@ -1,19 +1,19 @@
 package distribution.continuous
 
-import distribution.Distribution
+import distribution.Univariate
 import distribution.RandomGeneric
 import org.apache.commons.math3.special.Erf.erf
 import distribution.SpecialFunctions.{sigmoid, sech}
 
-case class Logistic(params: (Double,Double)=(0,1)) extends Distribution(params) {
+case class Logistic(params: (Double,Double)=(0,1)) extends Univariate(params) {
 
   type RvType = Double
-  type meanType = Double
-  type varType = Double
 
   def this(mean:Double, scale:Double) {
     this( (mean, scale) )
   }
+
+  def inSupport(x:Double) = true
 
   val (mean, scale) = params
   //require(sd > 0, "In Normal(mean, sd): sd > 0 required!")

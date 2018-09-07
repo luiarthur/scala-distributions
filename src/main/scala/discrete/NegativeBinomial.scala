@@ -1,6 +1,6 @@
 package distribution.discrete
 
-import distribution.Distribution
+import distribution.Univariate
 import distribution.RandomGeneric
 import distribution.SpecialFunctions.logChoose
 import org.apache.commons.math3.special.Beta.regularizedBeta
@@ -8,29 +8,34 @@ import org.apache.commons.math3.special.Beta.regularizedBeta
 // TODO: Test
 case class NegativeBinomial(params: (Int, Double)) extends NegativeBinomialBase(params)
 
-class NegativeBinomialBase(params: (Int,Double)) extends Distribution(params) {
+class NegativeBinomialBase(params: (Int,Double)) extends Univariate(params) {
   type RvType = Int
-  type meanType = Double
-  type varType = Double
 
   val (numSuccess, probSuccess) = params
   val mean = numSuccess * (1 - probSuccess) / probSuccess
   val variance = mean / probSuccess
   // require???
 
-  override def lpdf(x:Int): Double = {
+  def inSupport(x:RvType) = x >= 0
+
+  override def lpdf(x:RvType): Double = if (inSupport(x)) {
     logChoose(numSuccess + x - 1, x) + numSuccess * math.log(probSuccess) + x * math.log(1 - probSuccess)
+  } else {
+    Double.NegativeInfinity
   }
 
-  def pdf(x:Int):Double = {
+  // Here, x is the number of failures required.
+  def pdf(x:RvType):Double = {
     math.exp(lpdf(x))
   }
 
-  override def ccdf(x:Int): Double = {
+  override def ccdf(x:RvType): Double = if (inSupport(x)) {
     regularizedBeta(1 - probSuccess, x + 1, numSuccess)
+  } else {
+    1
   }
 
-  def cdf(x:Int): Double = 1 - ccdf(x)
+  def cdf(x:RvType): Double = 1 - ccdf(x)
 
   def sample[Rng <: RandomGeneric](rng:Rng): RvType = {
     rng.nextNegativeBinomial(numSuccess, probSuccess)

@@ -11,6 +11,7 @@ abstract class Distribution(params: Any*) {
   def sample[Rng <: distribution.RandomGeneric](rng:Rng): RvType
   def pdf(x:RvType): Double
   def cdf(x:RvType): Double
+  def inSupport(x:RvType): Boolean
   def ccdf(x:RvType): Double = 1 - cdf(x)
   def lpdf(x:RvType): Double = math.log(pdf(x))
   def lcdf(x:RvType): Double = math.log(cdf(x))
@@ -19,3 +20,13 @@ abstract class Distribution(params: Any*) {
   //def samples(n:Int):Vector[RvType] = Vector.tabulate(n){ i => sample }
 }
 
+
+abstract class Univariate(params: Any*) extends Distribution {
+  type meanType = Double
+  type varType = Double
+
+  def quantile(p:Double): RvType = {
+    require(p >= 0 && p <= 1)
+    ???
+  }
+}

@@ -33,6 +33,7 @@ case class Multinomial(params: (Int, Array[Double])) extends Distribution(params
     math.exp(lpdf(x))
   }
 
+  def inSupport(x:RvType) = ???
   def cdf(x:RvType): Double = ???
 
   def sample[Rng <: RandomGeneric](rng:Rng): RvType = {

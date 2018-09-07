@@ -1,14 +1,14 @@
 package distribution.continuous
 
-import distribution.Distribution
+import distribution.Univariate
 import distribution.RandomGeneric
 import org.apache.commons.math3.special.Erf.erf
 
-case class Normal(params: (Double,Double)=(0,1)) extends Distribution(params) {
+case class Normal(params: (Double,Double)=(0,1)) extends Univariate(params) {
 
   type RvType = Double
-  type meanType = Double
-  type varType = Double
+
+  def inSupport(x:Double) = true
 
   def this(mean:Double, sd:Double) {
     this( (mean, sd) )

@@ -15,6 +15,8 @@ case class InverseGamma(params: (Double,Double)) extends Distribution(params) {
     this( (shape, scale) )
   }
 
+  def inSupport(x:Double) = x > 0
+
   val (shape, scale) = params
   //require ???
 
@@ -22,7 +24,7 @@ case class InverseGamma(params: (Double,Double)) extends Distribution(params) {
   val variance = if (shape > 2) pow(scale / (shape - 1), 2) / (shape - 2) else Double.PositiveInfinity
 
   override def lpdf(x:Double):Double = {
-    if (x > 0) {
+    if (inSupport(x)) {
       shape * log(scale) - logGamma(shape) - (shape+1) * log(x) - scale / x
     } else {
       Double.NegativeInfinity
@@ -30,7 +32,7 @@ case class InverseGamma(params: (Double,Double)) extends Distribution(params) {
   }
 
   def pdf(x:Double):Double = math.exp(lpdf(x))
-  def cdf(x:Double):Double = if (x > 0) {
+  def cdf(x:Double):Double = if (inSupport(x)) {
     regularizedGammaQ(shape, scale / x)
   } else {
     0
