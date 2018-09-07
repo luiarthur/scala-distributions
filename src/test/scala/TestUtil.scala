@@ -6,9 +6,8 @@ trait TestUtil extends FunSuite {
   def assertApprox(x:Double, y:Double, eps:Double=1E-4, debug:Boolean=false) = {
     val valid = math.abs(x - y) < eps
     if (debug) {
-      if (!valid) {
-        println(s"invalid -- x: $x; y:$y")
-      } else println(s"valid -- x: $x; y:$y")
+      val msg = if(valid) "valid" else Console.RED + "invalid" + Console.RESET
+      println(s"$msg -- x: $x; y:$y")
     }
     assert(valid)
   }

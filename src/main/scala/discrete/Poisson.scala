@@ -6,12 +6,11 @@ import distribution.SpecialFunctions.logFactorial
 import org.apache.commons.math3.special.Gamma.regularizedGammaQ
 
 // TODO: Test
-case class Poisson(params: Double) extends Univariate(params) {
+case class Poisson(params: Double) extends Univariate[Int](params) {
   type RvType = Int
 
   val lam = params
-  //require(p >= 0 && p <= 1, "In Binomial(n, p): 0 <= p <= 1 required!")
-  //require(n >= 0, "Int Binomial(n, p): n >= 0 requried!")
+  require(lam > 0, "In Poisson(lam): lam > 0 required!")
 
   val mean = lam
   val variance = lam

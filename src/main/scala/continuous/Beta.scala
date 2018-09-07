@@ -6,31 +6,31 @@ import org.apache.commons.math3.special.Gamma._
 import org.apache.commons.math3.special.Beta._
 import math.{log, exp}
 
-case class Beta(params: (Double,Double)) extends Univariate(params) {
+case class Beta(params: (Double,Double)) extends Univariate[Double](params) {
   type RvType = Double
 
   def this(a:Double, b:Double) {
     this( (a, b) )
   }
 
-  def inSupport(x:Double) = 0 < x && x < 1
+  def inSupport(x:RvType) = 0 < x && x < 1
 
   val (a, b) = params
-  //require(sd > 0, "In Normal(mean, sd): sd > 0 required!")
+  require(a > 0 && b > 0, "In Beta(a, b): a, b > 0 required!")
 
   val mean = a / (a + b)
   val variance = mean * mean * b / (a * (a + b + 1))
 
-  override def lpdf(x:Double):Double = if (inSupport(x)) {
+  override def lpdf(x:RvType):Double = if (inSupport(x)) {
     logGamma(a + b) - logGamma(a) - logGamma(b) + (a - 1) * log(x) + (b - 1) * log(1 - x) 
   } else {
     Double.NegativeInfinity
   }
 
-  def pdf(x:Double):Double = math.exp(lpdf(x))
-  def cdf(x:Double):Double = x match {
+  def pdf(x:RvType):Double = math.exp(lpdf(x))
+  def cdf(x:RvType):Double = x match {
     case y if inSupport(y) => regularizedBeta(y, a, b)
-    case y if y > 1.0 => 1.0
+    case y if y >= 1.0 => 1.0
     case _ => 0.0
   }
 
@@ -38,7 +38,7 @@ case class Beta(params: (Double,Double)) extends Univariate(params) {
     s"Beta(a:$a, b:$b)"
   }
 
-  def sample[Rng <: distribution.RandomGeneric](rng: Rng):Double = {
+  def sample[Rng <: distribution.RandomGeneric](rng: Rng):RvType = {
     rng.nextBeta(a, b)
   }
 }

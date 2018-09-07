@@ -5,7 +5,7 @@ import distribution.RandomGeneric
 import distribution.SpecialFunctions._
 
 // TODO: Test
-case class Multinomial(params: (Int, Array[Double])) extends Distribution(params) {
+case class Multinomial(params: (Int, Array[Double])) extends Distribution[Array[Int]](params) {
   type RvType = Array[Int]
   type meanType = Array[Double]
   type varType = Array[Array[Double]]

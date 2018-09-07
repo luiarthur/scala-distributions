@@ -8,13 +8,13 @@ import org.apache.commons.math3.special.Beta.regularizedBeta
 // TODO: Test
 case class NegativeBinomial(params: (Int, Double)) extends NegativeBinomialBase(params)
 
-class NegativeBinomialBase(params: (Int,Double)) extends Univariate(params) {
+class NegativeBinomialBase(params: (Int,Double)) extends Univariate[Int](params) {
   type RvType = Int
 
   val (numSuccess, probSuccess) = params
   val mean = numSuccess * (1 - probSuccess) / probSuccess
   val variance = mean / probSuccess
-  // require???
+  require(numSuccess > 0 && probSuccess > 0)
 
   def inSupport(x:RvType) = x >= 0
 

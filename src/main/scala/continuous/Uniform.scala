@@ -4,7 +4,7 @@ import distribution.Univariate
 import distribution.RandomGeneric
 import math.{log, exp}
 
-case class Uniform(params: (Double,Double)) extends Univariate(params) {
+case class Uniform(params: (Double,Double)) extends Univariate[Double](params) {
 
   type RvType = Double
 
@@ -13,7 +13,7 @@ case class Uniform(params: (Double,Double)) extends Univariate(params) {
   }
 
   val (a, b) = params
-  //require(sd > 0, "In Normal(mean, sd): sd > 0 required!")
+  require(b > a, "Uniform(a, b): b > a required!")
 
   def inSupport(x:Double):Boolean = a <= x && x <= b
 

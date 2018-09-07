@@ -1,7 +1,6 @@
 package distribution
 
-abstract class Distribution(params: Any*) {
-  type RvType 
+abstract class Distribution[RvType](params: Any*) {
   type meanType
   type varType
 
@@ -21,7 +20,7 @@ abstract class Distribution(params: Any*) {
 }
 
 
-abstract class Univariate(params: Any*) extends Distribution {
+abstract class Univariate[RvType](params: Any*) extends Distribution[RvType] {
   type meanType = Double
   type varType = Double
 
@@ -29,4 +28,7 @@ abstract class Univariate(params: Any*) extends Distribution {
     require(p >= 0 && p <= 1)
     ???
   }
+
+  def max(): RvType = ???
+  def min(): RvType = ???
 }

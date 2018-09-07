@@ -6,12 +6,12 @@ import distribution.SpecialFunctions.logChoose
 import org.apache.commons.math3.special.Beta.regularizedBeta
 
 // TODO: Test
-case class Binomial(params: (Int,Double)) extends Univariate(params) {
+case class Binomial(params: (Int,Double)) extends Univariate[Int](params) {
   type RvType = Int
 
   val (n, p) = params
-  //require(p >= 0 && p <= 1, "In Binomial(n, p): 0 <= p <= 1 required!")
-  //require(n >= 0, "Int Binomial(n, p): n >= 0 requried!")
+  require(p >= 0 && p <= 1, "In Binomial(n, p): 0 <= p <= 1 required!")
+  require(n >= 0, "Int Binomial(n, p): n >= 0 requried!")
 
   def inSupport(x:RvType) = 0 <= x && x <= n
 

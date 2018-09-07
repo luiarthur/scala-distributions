@@ -1,29 +1,27 @@
 package distribution.continuous
 
-import distribution.Distribution
+import distribution.Univariate
 import distribution.RandomGeneric
 import org.apache.commons.math3.special.Gamma._
 import math.{log, exp, pow}
 
-case class InverseGamma(params: (Double,Double)) extends Distribution(params) {
+case class InverseGamma(params: (Double,Double)) extends Univariate[Double](params) {
 
   type RvType = Double
-  type meanType = Double
-  type varType = Double
 
   def this(shape:Double, scale:Double) {
     this( (shape, scale) )
   }
 
-  def inSupport(x:Double) = x > 0
+  def inSupport(x:RvType) = x > 0
 
   val (shape, scale) = params
-  //require ???
+  require(shape > 0 && scale > 0, "InverseGamma(a,b) params invalid.")
 
   val mean = if (shape > 1) scale / (shape - 1) else Double.PositiveInfinity
   val variance = if (shape > 2) pow(scale / (shape - 1), 2) / (shape - 2) else Double.PositiveInfinity
 
-  override def lpdf(x:Double):Double = {
+  override def lpdf(x:RvType):Double = {
     if (inSupport(x)) {
       shape * log(scale) - logGamma(shape) - (shape+1) * log(x) - scale / x
     } else {
@@ -31,8 +29,8 @@ case class InverseGamma(params: (Double,Double)) extends Distribution(params) {
     }
   }
 
-  def pdf(x:Double):Double = math.exp(lpdf(x))
-  def cdf(x:Double):Double = if (inSupport(x)) {
+  def pdf(x:RvType):Double = math.exp(lpdf(x))
+  def cdf(x:RvType):Double = if (inSupport(x)) {
     regularizedGammaQ(shape, scale / x)
   } else {
     0
@@ -42,7 +40,7 @@ case class InverseGamma(params: (Double,Double)) extends Distribution(params) {
     s"Gamma(shape:$shape, scale:$scale)"
   }
 
-  def sample[Rng <: distribution.RandomGeneric](rng: Rng):Double = {
+  def sample[Rng <: distribution.RandomGeneric](rng: Rng):RvType = {
     rng.nextInverseGamma(shape, scale)
   }
 }

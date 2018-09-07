@@ -5,11 +5,10 @@ import distribution.RandomGeneric
 import org.apache.commons.math3.special.Gamma._
 import math.{log, exp}
 
-case class Gamma(params: (Double,Double)) extends Univariate(params) {
-
+case class Gamma(params: (Double,Double)) extends Univariate[Double](params) {
   type RvType = Double
 
-  def inSupport(x:Double) = x > 0
+  def inSupport(x:RvType) = x > 0
 
   def this(shape:Double, rate:Double) {
     this( (shape, rate) )
@@ -21,7 +20,7 @@ case class Gamma(params: (Double,Double)) extends Univariate(params) {
   val mean = shape / rate
   val variance = mean / rate
 
-  override def lpdf(x:Double):Double = {
+  override def lpdf(x:RvType):Double = {
     if (inSupport(x)) {
       shape * log(rate) - logGamma(shape) + (shape - 1) * log(x) - rate * x
     } else {
@@ -29,8 +28,8 @@ case class Gamma(params: (Double,Double)) extends Univariate(params) {
     }
   }
 
-  def pdf(x:Double):Double = math.exp(lpdf(x))
-  def cdf(x:Double):Double = x match {
+  def pdf(x:RvType):Double = math.exp(lpdf(x))
+  def cdf(x:RvType):Double = x match {
     case y if inSupport(y) => regularizedGammaP(shape, rate * y)
     case _ => 0
   }
@@ -39,7 +38,7 @@ case class Gamma(params: (Double,Double)) extends Univariate(params) {
     s"Gamma(shape:$shape, rate:$rate)"
   }
 
-  def sample[Rng <: distribution.RandomGeneric](rng: Rng):Double = {
+  def sample[Rng <: distribution.RandomGeneric](rng: Rng):RvType = {
     rng.nextGamma(shape, rate)
   }
 }
