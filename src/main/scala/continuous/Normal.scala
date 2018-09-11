@@ -1,14 +1,18 @@
 package distribution.continuous
 
-import distribution.Univariate
+import distribution.UnivariateContinuous
 import distribution.RandomGeneric
 import org.apache.commons.math3.special.Erf.erf
 
-case class Normal(params: (Double,Double)=(0,1)) extends Univariate[Double](params) {
+case class Normal(params: (Double,Double)=(0,1)) extends UnivariateContinuous(params) {
 
   type RvType = Double
 
   def inSupport(x:RvType) = true
+
+  override lazy val min = Double.NegativeInfinity
+  override lazy val max = Double.PositiveInfinity
+  override lazy val mode = mean
 
   def this(mean:Double, sd:Double) {
     this( (mean, sd) )

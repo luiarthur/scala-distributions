@@ -6,7 +6,7 @@ import distribution.{RandomGeneric => RNG}
 case class UnivariateTruth(mean:Double, variance:Double,
                            pdf:Double, cdf:Double, quantile:Double=0)
 
-class UnivariateTester(dist:Univariate[Double], x:Double, rng:RNG, truth:UnivariateTruth, eps:Double=1E-2, n:Int=1E6.toInt, debug:Boolean=false) extends TestUtil {
+class UnivariateTester(dist:Univariate[Double], x:Double, p:Double=999, rng:RNG, truth:UnivariateTruth, eps:Double=1E-2, n:Int=1E6.toInt, debug:Boolean=false) extends TestUtil {
   val samples = Vector.fill(n){ dist.sample(rng) }
 
   def testMean() {
@@ -27,12 +27,16 @@ class UnivariateTester(dist:Univariate[Double], x:Double, rng:RNG, truth:Univari
     assertApprox(dist.pdf(x), truthPdf, eps, debug=debug)
   }
 
-  def testCdf(x:Double, truthCdf:Double) = {
+  def testCdf(x:Double, truthCdf:Double) {
     if (debug) print("cdf: ")
     assertApprox(dist.cdf(x), truthCdf, eps, debug=debug)
   }
 
-  def testQuantiles(eps:Double=1E-3) {
+  def testQuantile(p:Double, trueQuantile:Double) {
+    if (p != 999) {
+      if (debug) print("quantile: ")
+      assertApprox(dist.quantile(p), trueQuantile, eps, debug=debug)
+    }
   }
 
   def testSpeed(maxTimeout:Double=1.0) {
@@ -49,7 +53,7 @@ class UnivariateTester(dist:Univariate[Double], x:Double, rng:RNG, truth:Univari
     testVar()
     testPdf(x, truth.pdf)
     testCdf(x, truth.cdf)
-    testQuantiles()
+    testQuantile(p, truth.quantile)
     testSpeed()
   }
 }

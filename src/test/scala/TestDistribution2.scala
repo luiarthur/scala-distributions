@@ -11,18 +11,23 @@ class TestDistribution2 extends TestUtil {
     val rng = new RandomSeq(new scala.util.Random(0))
     val (mu, sig) = (3, 4)
     val x = 2.0
-    val truth = UnivariateTruth(mu, sig*sig, pdf=0.09666703, cdf=0.4012937)
-    (new UnivariateTester(Normal(mu,sig), x=x, rng=rng, truth=truth, debug=true)).test()
+    val p = 0.7
+    val truth = UnivariateTruth(mu, sig*sig, pdf=0.09666703, cdf=0.4012937, quantile=5.097602050832163)
+    val tester = new UnivariateTester(Normal(mu,sig), x=x, p=p, rng=rng, truth=truth, debug=true)
+
+    tester.test
   }
 
   test("Gamma2") {
     val rng = new RandomSeq(new scala.util.Random(0))
     val (a, b) = (5.0, 3.0)
     val x = 2.0
+    val p = 0.7
     val pdf = 0.4015579
     val cdf = 0.7149435
-    val truth = UnivariateTruth(a/b, a/(b*b), pdf=pdf, cdf=cdf)
-    val tester = (new UnivariateTester(Gamma(a,b), x=x, rng=rng, truth=truth, debug=true))
+    val quantile = 1.9634537712323352
+    val truth = UnivariateTruth(a/b, a/(b*b), pdf=pdf, cdf=cdf, quantile=quantile)
+    val tester = (new UnivariateTester(Gamma(a,b), x=x, rng=rng, p=p, truth=truth, debug=true))
     tester.testPdf(0, 0)
     tester.testCdf(0, 0)
     tester.testCdf(-1, 0)

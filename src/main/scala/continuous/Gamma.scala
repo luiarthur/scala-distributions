@@ -1,11 +1,11 @@
 package distribution.continuous
 
-import distribution.Univariate
+import distribution.UnivariateContinuous
 import distribution.RandomGeneric
 import org.apache.commons.math3.special.Gamma._
 import math.{log, exp}
 
-case class Gamma(params: (Double,Double)) extends Univariate[Double](params) {
+case class Gamma(params: (Double,Double)) extends UnivariateContinuous(params) {
   type RvType = Double
 
   def inSupport(x:RvType) = x > 0
@@ -19,6 +19,9 @@ case class Gamma(params: (Double,Double)) extends Univariate[Double](params) {
 
   val mean = shape / rate
   val variance = mean / rate
+  override lazy val min = 0
+  override lazy val max = Double.PositiveInfinity
+  override lazy val mode = if (shape >= 1) (shape - 1) / rate else 0
 
   override def lpdf(x:RvType):Double = {
     if (inSupport(x)) {
