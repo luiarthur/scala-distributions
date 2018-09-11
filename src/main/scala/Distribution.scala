@@ -5,8 +5,8 @@ abstract class Distribution[RvType](params: Any*) {
   type varType
 
   // TODO: Make these lazy val
-  val mean: meanType
-  val variance: varType
+  def mean: meanType
+  def variance: varType
 
   def sample[Rng <: distribution.RandomGeneric](rng:Rng): RvType
   def pdf(x:RvType): Double
@@ -25,13 +25,13 @@ abstract class Univariate[RvType](params: Any*) extends Distribution[RvType] {
   type meanType = Double
   type varType = Double
 
+  // TODO: Refactor. Remove ??? and implement in each distribution.
   def quantile(p:Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): RvType = ???
-
-  // TODO: Implement these
-  lazy val max: Double = ???
-  lazy val min: Double = ???
-  lazy val mode: Double = ???
+  def max: Double = ???
+  def min: Double = ???
+  def mode: Double = ???
 }
+
 
 abstract class UnivariateContinuous(params: Any*) extends Univariate[Double] {
   override def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double = {
