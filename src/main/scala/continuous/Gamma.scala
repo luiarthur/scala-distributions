@@ -45,10 +45,11 @@ case class Gamma(params: (Double,Double)) extends UnivariateContinuous(params) {
     rng.nextGamma(shape, rate)
   }
 
-  override def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000): Double = {
+  override def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double = {
     require(0 <= p && p <= 1, "quantile(p, eps): 0 <= p <= 1 required!")
-    if (shape >= 1) quantileNewton(p, mode, eps, maxIter) else {
-      quantileNewton(p, mean, eps, maxIter)
+    if (shape >= 1) quantileNewton(p, mode, eps, maxIter, verbose) else {
+      // TODO: First log transform, then find quantile, then exponentiate quantile.
+      quantileNewton(p, mean, eps, maxIter, verbose)
     }
   }
 }
