@@ -35,7 +35,7 @@ class UnivariateTester(dist:Univariate[Double], x:Double, p:Double=999, rng:RNG,
   def testQuantile(p:Double, trueQuantile:Double) {
     if (p != 999) {
       if (debug) print("quantile: ")
-      assertApprox(dist.quantile(p), trueQuantile, eps, debug=debug)
+      assertApprox(dist.quantile(p), trueQuantile, eps=1E-10, debug=debug)
     }
   }
 

@@ -44,4 +44,11 @@ case class Gamma(params: (Double,Double)) extends UnivariateContinuous(params) {
   def sample[Rng <: distribution.RandomGeneric](rng: Rng):RvType = {
     rng.nextGamma(shape, rate)
   }
+
+  override def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000): Double = {
+    require(0 <= p && p <= 1, "quantile(p, eps): 0 <= p <= 1 required!")
+    if (shape >= 1) quantileNewton(p, mode, eps, maxIter) else {
+      quantileNewton(p, mean, eps, maxIter)
+    }
+  }
 }

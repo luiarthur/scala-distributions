@@ -32,6 +32,7 @@ class TestDistribution2 extends TestUtil {
     tester.testCdf(0, 0)
     tester.testCdf(-1, 0)
     tester.test()
+    assertApprox(Gamma(.3, 3).quantile(.7), 0.085521637773684, eps=1E-10)
   }
 
   test("InverseGamma2") {

@@ -36,19 +36,19 @@ abstract class Univariate[RvType](params: Any*) extends Distribution[RvType] {
 abstract class UnivariateContinuous(params: Any*) extends Univariate[Double] {
   override def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000): Double = {
     require(0 <= p && p <= 1, "quantile(p, eps): 0 <= p <= 1 required!")
-    quantileNewton(p, eps, maxIter)
+    quantileNewton(p, mode, eps, maxIter)
   }
 
   /* See: http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
    */
-  private def quantileNewton(p:Double, eps:Double, maxIter:Int): Double = {
+  protected def quantileNewton(p:Double, init:Double, eps:Double, maxIter:Int): Double = {
     def engine(current:Double, iter:Int):Double = {
       val next = current + (p - cdf(current)) / pdf(current)
       if (iter <= 0) {
         println(s"Not converged after ${maxIter} iterations!")
         next
       } else if (math.abs(next - current) < eps) {
-        //println(s"Converged in ${maxIter - iter} iterations!")
+        //println(Console.YELLOW + s"Converged in ${maxIter - iter} iterations!" + Console.RESET)
         next 
       } else { 
         engine(next, iter-1)
@@ -58,7 +58,7 @@ abstract class UnivariateContinuous(params: Any*) extends Univariate[Double] {
     p match {
       case 0 => min
       case 1 => max
-      case _ => engine(mode, iter=maxIter)
+      case _ => engine(init, iter=maxIter)
     }
   }
 }
