@@ -35,4 +35,10 @@ object helper {
 
     engine(init, 0)
   }
+
+  def quantile(x:Vector[Double], p:Double): Double = {
+    require(0 <= p && p <= 1)
+    val n = (p * x.size).toInt
+    x.sorted.apply(n)
+  }
 }
