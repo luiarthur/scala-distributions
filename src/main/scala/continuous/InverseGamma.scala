@@ -1,11 +1,11 @@
 package distribution.continuous
 
-import distribution.Univariate
+import distribution.UnivariateContinuous
 import distribution.RandomGeneric
 import org.apache.commons.math3.special.Gamma._
 import math.{log, exp, pow}
 
-case class InverseGamma(params: (Double,Double)) extends Univariate[Double](params) {
+case class InverseGamma(params: (Double,Double)) extends UnivariateContinuous(params) {
 
   type RvType = Double
 
@@ -15,11 +15,14 @@ case class InverseGamma(params: (Double,Double)) extends Univariate[Double](para
 
   def inSupport(x:RvType) = x > 0
 
-  val (shape, scale) = params
+  lazy val (shape, scale) = params
   require(shape > 0 && scale > 0, "InverseGamma(a,b) params invalid.")
 
-  val mean = if (shape > 1) scale / (shape - 1) else Double.PositiveInfinity
-  val variance = if (shape > 2) pow(scale / (shape - 1), 2) / (shape - 2) else Double.PositiveInfinity
+  lazy val mean = if (shape > 1) scale / (shape - 1) else Double.PositiveInfinity
+  lazy val variance = if (shape > 2) pow(scale / (shape - 1), 2) / (shape - 2) else Double.PositiveInfinity
+  lazy val min = 0
+  lazy val max = Double.PositiveInfinity
+  lazy val mode = scale / (shape + 1)
 
   override def lpdf(x:RvType):Double = {
     if (inSupport(x)) {

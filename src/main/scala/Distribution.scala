@@ -26,15 +26,15 @@ abstract class Univariate[RvType](params: Any*) extends Distribution[RvType] {
   type varType = Double
 
   // TODO: Refactor. Remove ??? and implement in each distribution.
-  def quantile(p:Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): RvType = ???
-  def max: Double = ???
-  def min: Double = ???
-  def mode: Double = ???
+  def quantile(p:Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double
+  def max: Double
+  def min: Double
+  def mode: RvType
 }
 
 
 abstract class UnivariateContinuous(params: Any*) extends Univariate[Double] {
-  override def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double = {
+  def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double = {
     require(0 <= p && p <= 1, "quantile(p, eps): 0 <= p <= 1 required!")
     quantileNewton(p=p, init=mode, eps=eps, maxIter=maxIter, verbose=verbose)
   }
@@ -62,6 +62,23 @@ abstract class UnivariateContinuous(params: Any*) extends Univariate[Double] {
       case 0 => min
       case 1 => max
       case _ => helper.newton(init, f, fPrime, eps=eps, maxIter=maxIter, verbose=verbose)
+    }
+  }
+}
+
+
+abstract class UnivariateDiscrete(params: Any*) extends Univariate[Int] {
+  def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double = {
+    require(0 <= p && p <= 1, "quantile(p, eps): 0 <= p <= 1 required!")
+    def engine(x: Int, _cdf:Double=0): Double = {
+      val _newCdf = _cdf + pdf(x.toInt)
+      if (_newCdf >= p) x else engine(x + 1, _newCdf)
+    }
+
+    p match {
+      case 0 => min
+      case 1 => max
+      case _ => engine(min.toInt)
     }
   }
 }

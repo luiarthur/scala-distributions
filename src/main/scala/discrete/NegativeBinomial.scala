@@ -1,6 +1,6 @@
 package distribution.discrete
 
-import distribution.Univariate
+import distribution.UnivariateDiscrete
 import distribution.RandomGeneric
 import distribution.SpecialFunctions.logChoose
 import org.apache.commons.math3.special.Beta.regularizedBeta
@@ -8,12 +8,17 @@ import org.apache.commons.math3.special.Beta.regularizedBeta
 // TODO: Test
 case class NegativeBinomial(params: (Int, Double)) extends NegativeBinomialBase(params)
 
-class NegativeBinomialBase(params: (Int,Double)) extends Univariate[Int](params) {
+class NegativeBinomialBase(params: (Int,Double)) extends UnivariateDiscrete(params) {
   type RvType = Int
 
-  val (numSuccess, probSuccess) = params
-  val mean = numSuccess * (1 - probSuccess) / probSuccess
-  val variance = mean / probSuccess
+  lazy val (numSuccess, probSuccess) = params
+  lazy val mean = numSuccess * (1 - probSuccess) / probSuccess
+  lazy val variance = mean / probSuccess
+  lazy val min = 0
+  lazy val max = Double.PositiveInfinity
+  lazy val mode = if (numSuccess > 1) {
+    math.floor((numSuccess - 1) * (1 - probSuccess) / probSuccess).toInt
+  } else 0
   require(numSuccess > 0 && probSuccess > 0)
 
   def inSupport(x:RvType) = x >= 0

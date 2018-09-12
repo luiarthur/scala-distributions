@@ -1,16 +1,19 @@
 package distribution.discrete
 
-import distribution.Univariate
+import distribution.UnivariateDiscrete
 import distribution.RandomGeneric
 
-case class Bernoulli(params: Double) extends Univariate[Int](params) {
+case class Bernoulli(params: Double) extends UnivariateDiscrete(params) {
   type RvType = Int
 
-  val p = params
+  lazy val p = params
   require(p >= 0 && p <= 1, "In Bernoulli(p): 0 <= p <= 1 required!")
 
-  val mean = p
-  val variance = p * (1 - p)
+  lazy val mean = p
+  lazy val variance = p * (1 - p)
+  lazy val min = 0
+  lazy val max = 1
+  lazy val mode = if (p <= 0.5) 0 else 1
 
   def inSupport(x:RvType): Boolean = {
     x == 0 || x == 1

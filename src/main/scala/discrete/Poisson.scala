@@ -1,16 +1,20 @@
 package distribution.discrete
 
-import distribution.Univariate
+import distribution.UnivariateDiscrete
 import distribution.RandomGeneric
 import distribution.SpecialFunctions.logFactorial
 import org.apache.commons.math3.special.Gamma.regularizedGammaQ
 
 // TODO: Test
-case class Poisson(params: Double) extends Univariate[Int](params) {
+case class Poisson(params: Double) extends UnivariateDiscrete(params) {
   type RvType = Int
 
   val lam = params
   require(lam > 0, "In Poisson(lam): lam > 0 required!")
+  
+  lazy val min:Double = 0.0
+  lazy val max:Double = Double.PositiveInfinity
+  lazy val mode:Int = math.floor(lam).toInt
 
   val mean = lam
   val variance = lam

@@ -14,14 +14,14 @@ case class Gamma(params: (Double,Double)) extends UnivariateContinuous(params) {
     this( (shape, rate) )
   }
 
-  val (shape, rate) = params
+  lazy val (shape, rate) = params
   //require(sd > 0, "In Normal(mean, sd): sd > 0 required!")
 
-  val mean = shape / rate
-  val variance = mean / rate
-  override lazy val min = 0
-  override lazy val max = Double.PositiveInfinity
-  override lazy val mode = if (shape >= 1) (shape - 1) / rate else 0
+  lazy val mean = shape / rate
+  lazy val variance = mean / rate
+  lazy val min = 0
+  lazy val max = Double.PositiveInfinity
+  lazy val mode = if (shape >= 1) (shape - 1) / rate else 0
 
   override def lpdf(x:RvType):Double = {
     if (inSupport(x)) {

@@ -1,10 +1,10 @@
 package distribution.continuous
 
-import distribution.Univariate
+import distribution.UnivariateContinuous
 import distribution.RandomGeneric
 import math.{log, exp}
 
-case class Uniform(params: (Double,Double)) extends Univariate[Double](params) {
+case class Uniform(params: (Double,Double)) extends UnivariateContinuous(params) {
 
   type RvType = Double
 
@@ -12,16 +12,21 @@ case class Uniform(params: (Double,Double)) extends Univariate[Double](params) {
     this( (a, b) )
   }
 
-  val (a, b) = params
+  lazy val (a, b) = params
   require(b > a, "Uniform(a, b): b > a required!")
 
   def inSupport(x:Double):Boolean = a <= x && x <= b
 
-  val mean:Double = (a + b) / 2
-  val variance:Double = math.pow(b - a, 2) / 12.0
-  val range:Double = b - a
-  private val preComputedPdf = 1.0 / range
-  private val preComputedLogPdf = -math.log(range)
+  lazy val mean:Double = (a + b) / 2
+  lazy val variance:Double = math.pow(b - a, 2) / 12.0
+  lazy val range:Double = b - a
+  private lazy val preComputedPdf = 1.0 / range
+  private lazy val preComputedLogPdf = -math.log(range)
+
+  lazy val min = a
+  lazy val max = b
+  lazy val mode = (a + b) / 2
+
 
   override def lpdf(x:Double):Double = if (inSupport(x)) {
     preComputedLogPdf

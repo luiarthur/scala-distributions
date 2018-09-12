@@ -2,6 +2,7 @@ import org.scalatest.FunSuite
 import distribution.helper.{timer, timerWithTime}
 import org.apache.commons.math3.random.RandomDataGenerator
 import distribution.continuous._
+import distribution.discrete._
 import distribution.{RandomSeq, RandomPar}
 
 
@@ -43,8 +44,10 @@ class TestDistribution2 extends TestUtil {
     val cdf = 0.8684676654
     val mean = 2.5
     val variance = 6.25
-    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf)
-    val tester = (new UnivariateTester(InverseGamma(a,b), x=x, rng=rng, truth=truth, debug=true))
+    val q = 2.188110164362591
+    val p = .6
+    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf, quantile=q)
+    val tester = (new UnivariateTester(InverseGamma(a,b), x=x, p=p, rng=rng, truth=truth, debug=true))
     tester.testPdf(0, 0)
     tester.testCdf(0, 0)
     tester.testCdf(-1, 0)
@@ -59,8 +62,10 @@ class TestDistribution2 extends TestUtil {
     val cdf = 0.90374
     val mean = a / (a + b)
     val variance = 0.0260416
-    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf)
-    val tester = new UnivariateTester(Beta(a,b), x=x, rng=rng, truth=truth, debug=true)
+    val q = 0.4092151219095549
+    val p = .6
+    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf, quantile=q)
+    val tester = new UnivariateTester(Beta(a,b), x=x, p=p, rng=rng, truth=truth, debug=true)
     tester.testPdf(0, 0)
     tester.testPdf(1, 0)
     tester.testCdf(0, 0)
@@ -78,8 +83,10 @@ class TestDistribution2 extends TestUtil {
     val cdf = .622459331
     val mean = a
     val variance = 13.1594725
-    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf)
-    val tester = new UnivariateTester(Logistic(a,b), x=x, rng=rng, truth=truth, debug=true)
+    val p = .6
+    val q = 3.8109302162163283
+    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf, quantile=q)
+    val tester = new UnivariateTester(Logistic(a,b), x=x, p=p, rng=rng, truth=truth, debug=true)
     tester.test()
   }
 
@@ -91,8 +98,10 @@ class TestDistribution2 extends TestUtil {
     val cdf = 2.0 / 3.0
     val mean = 3.5
     val variance = .75
-    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf)
-    val tester = new UnivariateTester(Uniform(a,b), x=x, rng=rng, truth=truth, debug=true)
+    val p = .6
+    val q = 3.8
+    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf, quantile=q)
+    val tester = new UnivariateTester(Uniform(a,b), x=x, p=p, rng=rng, truth=truth, debug=true)
     tester.test()
 
     tester.testPdf(a, pdf)
@@ -104,6 +113,47 @@ class TestDistribution2 extends TestUtil {
   }
 
   // Discrete
+  test("Bernoulli") {
+    val rng = new RandomSeq(new scala.util.Random(0))
+    val p = .6
+    (0 to 10).foreach{ i =>
+      val q = i / 10.0
+      assert(Bernoulli(p).quantile(q) == (if (q > 1 - p) 1 else 0))
+    }
+  }
+
+  test("Binomial") {
+    val rng = new RandomSeq(new scala.util.Random(0))
+    assert(Binomial(10, .6).quantile(0.0) == 0)
+    assert(Binomial(10, .6).quantile(0.2) == 5)
+    assert(Binomial(10, .6).quantile(0.4) == 6)
+    assert(Binomial(10, .6).quantile(0.6) == 6)
+    assert(Binomial(10, .6).quantile(0.8) == 7)
+    assert(Binomial(10, .6).quantile(1.0) == 10)
+  }
+
+  test("Negative Binomial") {
+    val rng = new RandomSeq(new scala.util.Random(0))
+    assert(NegativeBinomial(10, .6).quantile(.7) == 8)
+    assert(NegativeBinomial(10, .6).quantile(0) == 0)
+    assert(NegativeBinomial(10, .6).quantile(1) == Double.PositiveInfinity)
+    assert(NegativeBinomial(10, .6).quantile(.2) == 4)
+    assert(NegativeBinomial(10, .6).quantile(.4) == 5)
+    assert(NegativeBinomial(10, .6).quantile(.6) == 7)
+    assert(NegativeBinomial(10, .6).quantile(.8) == 9)
+  }
+
+  test("Poisson") {
+    val rng = new RandomSeq(new scala.util.Random(0))
+    assert(Poisson(7).quantile(.7) == 8)
+    assert(Poisson(7).quantile(0) == 0)
+    assert(Poisson(7).quantile(1) == Double.PositiveInfinity)
+
+    assert(Poisson(7).quantile(.2) == 5)
+    assert(Poisson(7).quantile(.4) == 6)
+    assert(Poisson(7).quantile(.6) == 8)
+    assert(Poisson(7).quantile(.8) == 9)
+  }
 
   // Multivariate Continuous
 

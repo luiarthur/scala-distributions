@@ -10,9 +10,9 @@ case class Normal(params: (Double,Double)=(0,1)) extends UnivariateContinuous(pa
 
   def inSupport(x:RvType) = true
 
-  override lazy val min = Double.NegativeInfinity
-  override lazy val max = Double.PositiveInfinity
-  override lazy val mode = mean
+  lazy val min = Double.NegativeInfinity
+  lazy val max = Double.PositiveInfinity
+  lazy val mode = mean
 
   def this(mean:Double, sd:Double) {
     this( (mean, sd) )
