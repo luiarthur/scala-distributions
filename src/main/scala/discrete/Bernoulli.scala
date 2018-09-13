@@ -3,21 +3,18 @@ package distribution.discrete
 import distribution.UnivariateDiscrete
 import distribution.RandomGeneric
 
-case class Bernoulli(params: Double) extends UnivariateDiscrete(params) {
+case class Bernoulli(p: Double) extends UnivariateDiscrete {
   type RvType = Int
 
-  lazy val p = params
   require(p >= 0 && p <= 1, "In Bernoulli(p): 0 <= p <= 1 required!")
 
   lazy val mean = p
   lazy val variance = p * (1 - p)
   lazy val min = 0
   lazy val max = 1
+  lazy val isMaxInclusive = true
+  lazy val isMinInclusive = true
   lazy val mode = if (p <= 0.5) 0 else 1
-
-  def inSupport(x:RvType): Boolean = {
-    x == 0 || x == 1
-  }
 
   def pdf(x:RvType):Double = x match {
     case 0 => 1 - p
@@ -25,10 +22,9 @@ case class Bernoulli(params: Double) extends UnivariateDiscrete(params) {
     case _ => 0
   }
 
-  def cdf(x:RvType): Double = x match {
+  def cdfInSupport(x:RvType): Double = x match {
     case 0 => 1 - p
-    case y if y >= 1 => 1
-    case _ => 0
+    case 1 => 1
   }
 
 

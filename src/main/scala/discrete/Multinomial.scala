@@ -5,17 +5,13 @@ import distribution.RandomGeneric
 import distribution.SpecialFunctions._
 
 // TODO: Test
-case class Multinomial(params: (Int, Array[Double])) extends Distribution[Array[Int]](params) {
+case class Multinomial(m:Int, prob:Array[Double]) extends Distribution[Array[Int]] {
+  require(m > 0 && prob.forall(_ > 0))
+
   type RvType = Array[Int]
   type meanType = Array[Double]
   type varType = Array[Array[Double]]
 
-  def this(m: Int, prob:Array[Double]) {
-    this( (m, prob) )
-  }
-
-  val (m, prob) = params
-  //require???
 
   val mean = prob.map{ _ * m }
   val K = prob.size

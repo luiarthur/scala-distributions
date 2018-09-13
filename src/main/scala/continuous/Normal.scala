@@ -4,24 +4,18 @@ import distribution.UnivariateContinuous
 import distribution.RandomGeneric
 import org.apache.commons.math3.special.Erf.erf
 
-case class Normal(params: (Double,Double)=(0,1)) extends UnivariateContinuous(params) {
+case class Normal(mean:Double=0,sd:Double=1) extends UnivariateContinuous {
 
+  require(sd > 0, "In Normal(mean, sd): sd > 0 required!")
   type RvType = Double
-
-  def inSupport(x:RvType) = true
 
   lazy val min = Double.NegativeInfinity
   lazy val max = Double.PositiveInfinity
+  lazy val isMaxInclusive = false
+  lazy val isMinInclusive = false
   lazy val mode = mean
 
-  def this(mean:Double, sd:Double) {
-    this( (mean, sd) )
-  }
-
-  val (mean, sd) = params
-  require(sd > 0, "In Normal(mean, sd): sd > 0 required!")
-
-  val variance = sd * sd
+  lazy val variance = sd * sd
 
   override def lpdf(x:RvType):Double = {
     lazy val z = (x - mean) / sd
@@ -29,7 +23,7 @@ case class Normal(params: (Double,Double)=(0,1)) extends UnivariateContinuous(pa
   }
 
   def pdf(x:RvType):Double = math.exp(lpdf(x))
-  def cdf(x:RvType):Double = {
+  def cdfInSupport(x:RvType):Double = {
     lazy val z = (x - mean) / sd
     0.5 * (1 + erf(z / math.sqrt(2)))
   }

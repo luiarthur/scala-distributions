@@ -5,23 +5,18 @@ import distribution.RandomGeneric
 import org.apache.commons.math3.special.Gamma._
 import math.{log, exp}
 
-case class Gamma(params: (Double,Double)) extends UnivariateContinuous(params) {
+case class Gamma(shape:Double, rate:Double) extends UnivariateContinuous {
   type RvType = Double
 
-  def inSupport(x:RvType) = x > 0
-
-  def this(shape:Double, rate:Double) {
-    this( (shape, rate) )
-  }
-
-  lazy val (shape, rate) = params
-  //require(sd > 0, "In Normal(mean, sd): sd > 0 required!")
+  require(shape > 0 && rate > 0, "Gamma(shape, rate): shape, rate > 0 required!")
 
   lazy val mean = shape / rate
   lazy val variance = mean / rate
   lazy val min = 0
   lazy val max = Double.PositiveInfinity
   lazy val mode = if (shape >= 1) (shape - 1) / rate else 0
+  lazy val isMaxInclusive = false
+  lazy val isMinInclusive = false
 
   override def lpdf(x:RvType):Double = {
     if (inSupport(x)) {
@@ -32,9 +27,8 @@ case class Gamma(params: (Double,Double)) extends UnivariateContinuous(params) {
   }
 
   def pdf(x:RvType):Double = math.exp(lpdf(x))
-  def cdf(x:RvType):Double = x match {
-    case y if inSupport(y) => regularizedGammaP(shape, rate * y)
-    case _ => 0
+  def cdfInSupport(x:RvType):Double =  {
+    regularizedGammaP(shape, rate * x)
   }
 
   override def toString = {

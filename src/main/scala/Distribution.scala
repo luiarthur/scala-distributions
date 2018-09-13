@@ -1,6 +1,6 @@
 package distribution
 
-abstract class Distribution[RvType](params: Any*) {
+abstract class Distribution[RvType] {
   type meanType
   type varType
 
@@ -21,7 +21,7 @@ abstract class Distribution[RvType](params: Any*) {
 }
 
 
-abstract class Univariate[RvType](params: Any*) extends Distribution[RvType] {
+abstract class Univariate[RvType] extends Distribution[RvType] {
   type meanType = Double
   type varType = Double
 
@@ -29,11 +29,24 @@ abstract class Univariate[RvType](params: Any*) extends Distribution[RvType] {
   def quantile(p:Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double
   def max: Double
   def min: Double
+  def isMaxInclusive: Boolean
+  def isMinInclusive: Boolean
   def mode: RvType
+  protected def cdfInSupport(x:RvType): Double
 }
 
 
-abstract class UnivariateContinuous(params: Any*) extends Univariate[Double] {
+abstract class UnivariateContinuous extends Univariate[Double] {
+  def inSupport(x:Double): Boolean = {
+    (min < x && x < max) || (isMaxInclusive && x == max) || (isMinInclusive && x == min)
+  }
+
+  def cdf(x:Double):Double = x match {
+    case v if inSupport(v) => cdfInSupport(x)
+    case v if v <= min => 0
+    case v if v >= max => 1
+  }
+
   def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double = {
     require(0 <= p && p <= 1, "quantile(p, eps): 0 <= p <= 1 required!")
     quantileNewton(p=p, init=mode, eps=eps, maxIter=maxIter, verbose=verbose)
@@ -67,7 +80,17 @@ abstract class UnivariateContinuous(params: Any*) extends Univariate[Double] {
 }
 
 
-abstract class UnivariateDiscrete(params: Any*) extends Univariate[Int] {
+abstract class UnivariateDiscrete extends Univariate[Int] {
+  def inSupport(x:Int): Boolean = {
+    (min < x && x < max) || (isMaxInclusive && x == max) || (isMinInclusive && x == min)
+  }
+
+  def cdf(x:Int):Double = x match {
+    case v if inSupport(v) => cdfInSupport(x)
+    case v if v <= min => 0
+    case v if v >= max => 1
+  }
+
   def quantile(p: Double, eps:Double=1E-12, maxIter:Int=10000, verbose:Int=1): Double = {
     require(0 <= p && p <= 1, "quantile(p, eps): 0 <= p <= 1 required!")
     def engine(x: Int, _cdf:Double=0): Double = {

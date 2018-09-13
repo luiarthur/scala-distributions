@@ -4,18 +4,10 @@ import distribution.UnivariateContinuous
 import distribution.RandomGeneric
 import math.{log, exp}
 
-case class Uniform(params: (Double,Double)) extends UnivariateContinuous(params) {
-
-  type RvType = Double
-
-  def this(a:Double, b:Double) {
-    this( (a, b) )
-  }
-
-  lazy val (a, b) = params
+case class Uniform(a:Double, b:Double) extends UnivariateContinuous {
   require(b > a, "Uniform(a, b): b > a required!")
 
-  def inSupport(x:Double):Boolean = a <= x && x <= b
+  type RvType = Double
 
   lazy val mean:Double = (a + b) / 2
   lazy val variance:Double = math.pow(b - a, 2) / 12.0
@@ -25,6 +17,8 @@ case class Uniform(params: (Double,Double)) extends UnivariateContinuous(params)
 
   lazy val min = a
   lazy val max = b
+  lazy val isMinInclusive = true
+  lazy val isMaxInclusive = true
   lazy val mode = (a + b) / 2
 
 
@@ -35,10 +29,8 @@ case class Uniform(params: (Double,Double)) extends UnivariateContinuous(params)
   }
 
   def pdf(x:Double):Double = preComputedPdf
-  def cdf(x:Double):Double = x match {
-    case y if inSupport(y) => (y - a) / range
-    case y if y > b => 1.0
-    case _ => 0.0
+  def cdfInSupport(x:Double):Double = {
+    (x - a) / range
   }
 
   override def toString = {
