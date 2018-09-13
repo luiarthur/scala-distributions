@@ -3,11 +3,10 @@ import distribution.helper.timer
 
 trait TestUtil extends FunSuite {
 
-  def assertApprox(x:Double, y:Double, eps:Double=1E-4, debug:Boolean=false) = {
+  def assertApprox(x:Double, y:Double, eps:Double=1E-4, debug:Boolean=false, msg:String="") = {
     val valid = math.abs(x - y) < eps
-    if (debug) {
-      val msg = if(valid) "valid" else Console.RED + "invalid" + Console.RESET
-      println(s"$msg -- x: $x; y:$y")
+    if (!valid) {
+      println(Console.RED + s"$msg: $x not equal to $y" + Console.RESET)
     }
     assert(valid)
   }

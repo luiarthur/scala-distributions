@@ -4,34 +4,26 @@ import org.apache.commons.math3.random.RandomDataGenerator
 import distribution.continuous._
 import distribution.discrete._
 import distribution.{RandomSeq, RandomPar}
+import org.apache.commons.math3.{distribution => adist}
 
 
 class TestDistribution2 extends TestUtil {
   // Continuous
   test("Normal2") {
     val rng = new RandomSeq(new scala.util.Random(0))
-    val (mu, sig) = (3, 4)
-    val x = 2.0
-    val p = 0.7
-    val truth = UnivariateTruth(mu, sig*sig, pdf=0.09666703, cdf=0.4012937, quantile=5.097602050832163)
-    val tester = new UnivariateTester(Normal(mu,sig), x=x, p=p, rng=rng, truth=truth, debug=true)
-
-    tester.test
+    new UnivariateContinuousTester(Normal(3,4),
+                                   new adist.NormalDistribution(3,4),
+                                   x=2.0, rng=rng).test
   }
 
   test("Gamma2") {
     val rng = new RandomSeq(new scala.util.Random(0))
-    val (a, b) = (5.0, 3.0)
-    val x = 2.0
-    val p = 0.7
-    val pdf = 0.4015579
-    val cdf = 0.7149435
-    val quantile = 1.9634537712323352
-    val truth = UnivariateTruth(a/b, a/(b*b), pdf=pdf, cdf=cdf, quantile=quantile)
-    val tester = (new UnivariateTester(Gamma(a,b), x=x, rng=rng, p=p, truth=truth, debug=true))
-    tester.testPdf(0, 0)
-    tester.testCdf(0, 0)
-    tester.testCdf(-1, 0)
+    val tester = new UnivariateContinuousTester(
+      Gamma(5,3), new adist.GammaDistribution(5,1.0/3.0), x=2.0, rng=rng)
+    tester.test
+    tester.testPdf(0)
+    tester.testCdf(0)
+    tester.testCdf(-1)
     tester.test()
     assertApprox(Gamma(.3, 3).quantile(.7), 0.085521637773684, eps=1E-10)
   }
@@ -56,22 +48,14 @@ class TestDistribution2 extends TestUtil {
 
   test("Beta2") {
     val rng = new RandomSeq(new scala.util.Random(0))
-    val (a, b) = (3.0, 5.0)
-    val x = 0.6
-    val pdf = 0.96768
-    val cdf = 0.90374
-    val mean = a / (a + b)
-    val variance = 0.0260416
-    val q = 0.4092151219095549
-    val p = .6
-    val truth = UnivariateTruth(mean=mean, variance=variance, pdf=pdf, cdf=cdf, quantile=q)
-    val tester = new UnivariateTester(Beta(a,b), x=x, p=p, rng=rng, truth=truth, debug=true)
-    tester.testPdf(0, 0)
-    tester.testPdf(1, 0)
-    tester.testCdf(0, 0)
-    tester.testCdf(-1, 0)
-    tester.testCdf(1, 1)
-    tester.testCdf(2, 1)
+    val tester = new UnivariateContinuousTester(
+      Beta(3,5), new adist.BetaDistribution(3,5), x=0.6, rng=rng)
+    tester.testPdf(0)
+    tester.testPdf(1)
+    tester.testCdf(0)
+    tester.testCdf(-1)
+    tester.testCdf(1)
+    tester.testCdf(2)
     tester.test()
   }
 
